@@ -7,6 +7,7 @@ import { AlertCircle } from "lucide-react";
 import { api } from "~/convex/_generated/api";
 import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
+import { ImageUpload } from "~/components/ImageUpload";
 import { Button } from "~/components/ui/button";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
@@ -41,6 +42,7 @@ export default function EditRecipePage() {
   const updateRecipe = useMutation(api.recipes.update);
 
   const [markdown, setMarkdown] = useState("");
+  const [imageId, setImageId] = useState<Id<"_storage"> | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export default function EditRecipePage() {
   useEffect(() => {
     if (recipe && !initialized) {
       setMarkdown(recipe.content);
+      if (recipe.imageId) setImageId(recipe.imageId);
       setInitialized(true);
     }
   }, [recipe, initialized]);
@@ -71,6 +74,7 @@ export default function EditRecipePage() {
           id: id as Id<"recipes">,
           title,
           content: markdown,
+          ...(imageId ? { imageId } : {}),
         });
         router.push(`/recipes/${id}`);
       } catch (e) {
@@ -121,6 +125,11 @@ export default function EditRecipePage() {
           </div>
         </div>
       </div>
+
+      <ImageUpload
+        currentImageUrl={recipe.imageUrl}
+        onUpload={(id) => setImageId(id)}
+      />
 
       {/* Mobile: tab switcher */}
       <div className="border-border bg-muted flex border-b md:hidden">

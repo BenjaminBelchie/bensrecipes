@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { AlertCircle } from "lucide-react";
 import { api } from "~/convex/_generated/api";
+import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
+import { ImageUpload } from "~/components/ImageUpload";
 import { Button } from "~/components/ui/button";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
@@ -35,6 +37,7 @@ export default function NewRecipePage() {
   const router = useRouter();
   const createRecipe = useMutation(api.recipes.create);
   const [markdown, setMarkdown] = useState("");
+  const [imageId, setImageId] = useState<Id<"_storage"> | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
@@ -52,7 +55,11 @@ export default function NewRecipePage() {
     setError(null);
     startTransition(async () => {
       try {
-        const id = await createRecipe({ title, content: markdown });
+        const id = await createRecipe({
+          title,
+          content: markdown,
+          ...(imageId ? { imageId } : {}),
+        });
         router.push(`/recipes/${id}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to save recipe.");
@@ -77,6 +84,8 @@ export default function NewRecipePage() {
           </Button>
         </div>
       </div>
+
+      <ImageUpload onUpload={(id) => setImageId(id)} />
 
       {/* Mobile: tab switcher */}
       <div className="border-border bg-muted flex border-b md:hidden">

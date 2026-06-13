@@ -4,7 +4,15 @@ import { v } from "convex/values";
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("recipes").collect();
+    const recipes = await ctx.db.query("recipes").collect();
+    return Promise.all(
+      recipes.map(async (recipe) => {
+        const imageUrl = recipe.imageId
+          ? await ctx.storage.getUrl(recipe.imageId)
+          : (recipe.imageUrl ?? null);
+        return { ...recipe, imageUrl };
+      }),
+    );
   },
 });
 
@@ -22,10 +30,19 @@ export const getById = query({
   },
 });
 
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
 export const create = mutation({
   args: {
     title: v.string(),
     content: v.string(),
+    imageId: v.optional(v.id("_storage")),
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -43,10 +60,11 @@ export const update = mutation({
     id: v.id("recipes"),
     title: v.string(),
     content: v.string(),
+    imageId: v.optional(v.id("_storage")),
   },
-  handler: async (ctx, { id, title, content }) => {
+  handler: async (ctx, { id, title, content, imageId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    await ctx.db.patch(id, { title, content });
+    await ctx.db.patch(id, { title, content, imageId });
   },
 });

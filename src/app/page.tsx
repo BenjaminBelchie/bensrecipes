@@ -3,7 +3,7 @@ import Link from "next/link";
 import RecipeGrid from "~/components/RecipeGrid";
 import HeroSection, {
   type RecipeHighlight,
-} from "~/components/blocks/hero-section-41";
+} from "~/components/HeroSection";
 
 const recipeHighlights: RecipeHighlight[] = [
   {
