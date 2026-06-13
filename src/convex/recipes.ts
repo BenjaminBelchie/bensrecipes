@@ -69,3 +69,12 @@ export const update = mutation({
     await ctx.db.patch(id, { title, content, imageId, tags });
   },
 });
+
+export const remove = mutation({
+  args: { id: v.id("recipes") },
+  handler: async (ctx, { id }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    await ctx.db.delete(id);
+  },
+});

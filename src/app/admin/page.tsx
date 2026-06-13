@@ -1,10 +1,13 @@
-import { fetchQuery } from "convex/nextjs";
+"use client";
+
 import Link from "next/link";
+import { useQuery } from "convex/react";
 import { Plus, Eye, Pencil, ChefHat } from "lucide-react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
+import { DeleteRecipeButton } from "~/components/DeleteRecipeButton";
 import {
   Empty,
   EmptyMedia,
@@ -13,9 +16,10 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "~/components/ui/empty";
+import { Skeleton } from "~/components/ui/skeleton";
 
-export default async function AdminPage() {
-  const recipes = await fetchQuery(api.recipes.get);
+export default function AdminPage() {
+  const recipes = useQuery(api.recipes.get);
 
   return (
     <div className="bg-background min-h-screen">
@@ -44,10 +48,25 @@ export default async function AdminPage() {
             <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               Recipes
             </span>
-            <Badge variant="secondary">{recipes.length}</Badge>
+            {recipes !== undefined && (
+              <Badge variant="secondary">{recipes.length}</Badge>
+            )}
           </div>
 
-          {recipes.length === 0 ? (
+          {recipes === undefined ? (
+            <div className="divide-border divide-y">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between gap-4 px-5 py-3.5">
+                  <Skeleton className="h-4 w-48" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-7 w-14" />
+                    <Skeleton className="h-7 w-14" />
+                    <Skeleton className="h-7 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : recipes.length === 0 ? (
             <Empty className="rounded-none border-0 py-16">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -89,6 +108,7 @@ export default async function AdminPage() {
                           Edit
                         </Link>
                       </Button>
+                      <DeleteRecipeButton id={recipe._id} title={recipe.title} />
                     </div>
                   </div>
                 </li>
