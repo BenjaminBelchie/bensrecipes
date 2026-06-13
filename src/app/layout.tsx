@@ -36,7 +36,10 @@ export default function RootLayout({
       <body className="bg-background text-foreground font-sans antialiased">
         <ClerkProvider>
           <ConvexClientProvider>
-            <header className="bg-background sticky top-0 z-50 border-b border-black/8 backdrop-blur-xl">
+            <header
+              className="bg-background sticky top-0 z-50 border-b border-black/8 backdrop-blur-xl"
+              style={{ viewTransitionName: "site-header" }}
+            >
               <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                 <Link
                   href="/"

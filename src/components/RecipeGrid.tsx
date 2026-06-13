@@ -53,22 +53,27 @@ export default function RecipeGrid() {
           className="group border-border bg-card hover:shadow-primary/10 relative overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
         >
           {/* Image / placeholder */}
-          <div className="relative aspect-[4/3] overflow-hidden">
-            {recipe.imageUrl ? (
+          {recipe.imageUrl ? (
+            <div
+              className="relative aspect-[4/3] overflow-hidden bg-black"
+              style={{ viewTransitionName: `recipe-image-${recipe._id}` }}
+            >
               <Image
                 src={recipe.imageUrl}
                 alt={recipe.title}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-contain"
               />
-            ) : (
+            </div>
+          ) : (
+            <div className="relative aspect-[4/3] overflow-hidden">
               <div className="from-primary/8 via-primary/12 to-primary/5 flex h-full w-full items-center justify-center bg-gradient-to-br">
                 <span className="font-heading text-primary/20 text-6xl font-black">
                   ✦
                 </span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Title */}
           <div className="p-5">
