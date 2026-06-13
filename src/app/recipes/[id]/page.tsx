@@ -5,6 +5,7 @@ import Image from "next/image";
 import { api } from "~/convex/_generated/api";
 import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
+import { Badge } from "~/components/ui/badge";
 
 export default async function RecipePage({
   params,
@@ -24,7 +25,7 @@ export default async function RecipePage({
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8">
         <Link
-          href="/"
+          href="/recipes"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
           ← All Recipes
@@ -41,6 +42,15 @@ export default async function RecipePage({
             fill
             className="object-contain"
           />
+        </div>
+      )}
+      {recipe.tags && recipe.tags.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-2">
+          {recipe.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              {tag}
+            </Badge>
+          ))}
         </div>
       )}
       <MarkdownRenderer

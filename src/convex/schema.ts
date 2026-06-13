@@ -6,9 +6,12 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     imageId: v.optional(v.id("_storage")),
-    imageUrl: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
     authorId: v.optional(v.string()),
   })
     .searchIndex("search_title", { searchField: "title" })
     .index("by_author", ["authorId"]),
+  tags: defineTable({
+    name: v.string(),
+  }).index("by_name", ["name"]),
 });

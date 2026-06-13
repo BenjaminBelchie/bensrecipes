@@ -20,7 +20,7 @@ const config = {
       {
         protocol: "https",
         hostname: "confident-lemur-543.eu-west-1.convex.cloud",
-      }
+      },
     ],
   },
 };

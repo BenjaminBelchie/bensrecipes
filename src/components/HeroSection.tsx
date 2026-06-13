@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import Link from "next/link";
 
 import Autoplay from "embla-carousel-autoplay";
 import { Separator } from "~/components/ui/separator";
@@ -108,10 +109,10 @@ const HeroSection = ({
                 size="lg"
                 className="group relative w-fit overflow-hidden rounded-full before:absolute before:inset-0 before:rounded-[inherit] before:bg-size-[250%_250%,100%_100%] before:bg-position-[200%_0,0_0] before:transition-[background-position_0s_ease] before:duration-1000"
               >
-                <a href="#recipes">
+                <Link href="/recipes">
                   Browse recipes
                   <ArrowRightIcon className="transition-transform duration-200 group-hover:translate-x-0.5" />
-                </a>
+                </Link>
               </Button>
             </div>
           </div>

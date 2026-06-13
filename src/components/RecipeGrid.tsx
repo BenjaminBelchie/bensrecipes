@@ -4,12 +4,22 @@ import { useQuery } from "convex/react";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "~/convex/_generated/api";
+import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 
-export default function RecipeGrid() {
-  const recipes = useQuery(api.recipes.get);
+export default function RecipeGrid({
+  selectedTags = [],
+}: {
+  selectedTags?: string[];
+}) {
+  const allRecipes = useQuery(api.recipes.get);
 
-  if (recipes === undefined) {
+  const recipes =
+    allRecipes && selectedTags.length > 0
+      ? allRecipes.filter((r) => selectedTags.every((t) => r.tags?.includes(t)))
+      : allRecipes;
+
+  if (recipes === undefined || recipes === null) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -75,11 +85,20 @@ export default function RecipeGrid() {
             </div>
           )}
 
-          {/* Title */}
+          {/* Title + tags */}
           <div className="p-5">
             <h3 className="font-heading text-card-foreground group-hover:text-primary text-lg leading-tight font-bold transition-colors duration-200">
               {recipe.title}
             </h3>
+            {recipe.tags && recipe.tags.length > 0 && (
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {recipe.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Bottom accent bar that slides in on hover */}

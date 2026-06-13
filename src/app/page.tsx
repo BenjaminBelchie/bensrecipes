@@ -1,9 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import RecipeGrid from "~/components/RecipeGrid";
-import HeroSection, {
-  type RecipeHighlight,
-} from "~/components/HeroSection";
+import HeroSection, { type RecipeHighlight } from "~/components/HeroSection";
 
 const recipeHighlights: RecipeHighlight[] = [
   {

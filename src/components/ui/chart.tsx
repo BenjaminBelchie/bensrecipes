@@ -202,7 +202,10 @@ function ChartTooltipContent({
           .map((item, index) => {
             const key = String(nameKey ?? item.name ?? item.dataKey ?? "value");
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
-            const indicatorColor = color ?? (item.payload as { fill?: string } | undefined)?.fill ?? item.color;
+            const indicatorColor =
+              color ??
+              (item.payload as { fill?: string } | undefined)?.fill ??
+              item.color;
 
             return (
               <div
@@ -356,9 +359,7 @@ function getPayloadConfigFromPayload(
     key in payloadPayload &&
     typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
   ) {
-    configLabelKey = payloadPayload[
-      key as keyof typeof payloadPayload
-    ];
+    configLabelKey = payloadPayload[key as keyof typeof payloadPayload];
   }
 
   return configLabelKey in config ? config[configLabelKey] : config[key];

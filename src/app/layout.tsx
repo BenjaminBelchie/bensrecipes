@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { UserNav } from "~/components/UserNav";
+import { Toaster } from "~/components/ui/sonner";
 import "~/styles/globals.css";
 
 const fraunces = Fraunces({
@@ -48,11 +49,18 @@ export default function RootLayout({
                   Ben<span className="text-primary">&apos;s</span> Recipes
                 </Link>
                 <nav className="flex items-center gap-6 text-sm">
+                  <Link
+                    href="/recipes"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Recipes
+                  </Link>
                   <UserNav />
                 </nav>
               </div>
             </header>
             <main>{children}</main>
+            <Toaster />
           </ConvexClientProvider>
         </ClerkProvider>
       </body>

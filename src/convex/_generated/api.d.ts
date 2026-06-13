@@ -9,6 +9,7 @@
  */
 
 import type * as recipes from "../recipes.js";
+import type * as tags from "../tags.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   recipes: typeof recipes;
+  tags: typeof tags;
 }>;
 
 /**

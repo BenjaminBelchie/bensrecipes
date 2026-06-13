@@ -9,7 +9,7 @@ export const get = query({
       recipes.map(async (recipe) => {
         const imageUrl = recipe.imageId
           ? await ctx.storage.getUrl(recipe.imageId)
-          : (recipe.imageUrl ?? null);
+          : null;
         return { ...recipe, imageUrl };
       }),
     );
@@ -24,7 +24,7 @@ export const getById = query({
 
     const imageUrl = recipe.imageId
       ? await ctx.storage.getUrl(recipe.imageId)
-      : (recipe.imageUrl ?? null);
+      : null;
 
     return { ...recipe, imageUrl };
   },
@@ -43,7 +43,7 @@ export const create = mutation({
     title: v.string(),
     content: v.string(),
     imageId: v.optional(v.id("_storage")),
-    imageUrl: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -61,10 +61,11 @@ export const update = mutation({
     title: v.string(),
     content: v.string(),
     imageId: v.optional(v.id("_storage")),
+    tags: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, { id, title, content, imageId }) => {
+  handler: async (ctx, { id, title, content, imageId, tags }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    await ctx.db.patch(id, { title, content, imageId });
+    await ctx.db.patch(id, { title, content, imageId, tags });
   },
 });
