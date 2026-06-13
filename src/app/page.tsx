@@ -33,7 +33,8 @@ const recipeHighlights: RecipeHighlight[] = [
 ];
 
 export default async function HomePage() {
-  const { userId } = await auth();
+  const { sessionClaims } = await auth();
+  const isAdmin = sessionClaims?.metadata?.role === "admin";
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       {/* ── Hero ───────────────────────────────────────────────── */}
@@ -52,7 +53,7 @@ export default async function HomePage() {
           <h2 className="font-heading text-foreground text-3xl font-bold">
             All Recipes
           </h2>
-          {userId && (
+          {isAdmin && (
             <Link
               href="/recipes/new"
               className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"

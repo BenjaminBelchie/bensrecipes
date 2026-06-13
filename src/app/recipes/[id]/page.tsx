@@ -1,29 +1,22 @@
-"use client";
-
-import { useQuery } from "convex/react";
-import { useParams } from "next/navigation";
+import { fetchQuery } from "convex/nextjs";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { api } from "~/convex/_generated/api";
 import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 
-export default function RecipePage() {
-  const { id } = useParams<{ id: string }>();
-  const recipe = useQuery(api.recipes.getById, { id: id as Id<"recipes"> });
+export default async function RecipePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const recipe = await fetchQuery(api.recipes.getById, {
+    id: id as Id<"recipes">,
+  });
 
-  if (recipe === undefined) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-400">Loading…</p>
-      </div>
-    );
-  }
-  if (recipe === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">Recipe not found.</p>
-      </div>
-    );
+  if (!recipe) {
+    notFound();
   }
 
   return (

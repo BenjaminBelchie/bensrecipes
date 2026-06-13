@@ -2,6 +2,10 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 
+html {
+  scroll-padding-top: 4rem;
+}
+
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);

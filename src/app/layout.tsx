@@ -49,7 +49,7 @@ export default function RootLayout({
                 </nav>
               </div>
             </header>
-            {children}
+            <main>{children}</main>
           </ConvexClientProvider>
         </ClerkProvider>
       </body>
