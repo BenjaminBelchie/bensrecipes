@@ -1,134 +1,159 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { Authenticated, Unauthenticated, AuthLoading, useQuery } from "convex/react";
+import {
+  Authenticated,
+  Unauthenticated,
+  AuthLoading,
+  useQuery,
+} from "convex/react";
 import Link from "next/link";
-import { api } from "../../../convex/_generated/api";
+import { Plus, Eye, Pencil, ChefHat } from "lucide-react";
+import { api } from "~/convex/_generated/api";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Separator } from "~/components/ui/separator";
+import {
+  Empty,
+  EmptyMedia,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "~/components/ui/empty";
 
 export default function AdminPage() {
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Admin</h1>
-        <p className="mb-8 text-gray-500">Clerk + Convex connection test</p>
+    <main className="bg-background min-h-screen">
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        {/* Page header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="font-heading text-foreground text-2xl font-bold tracking-tight">
+              Admin
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Manage your recipe collection
+            </p>
+          </div>
+          <Button asChild size="sm">
+            <Link href="/recipes/new">
+              <Plus />
+              New Recipe
+            </Link>
+          </Button>
+        </div>
 
         <AuthLoading>
-          <StatusCard status="loading" title="Checking auth..." />
+          <RecipeListSkeleton />
         </AuthLoading>
 
         <Unauthenticated>
-          <StatusCard
-            status="error"
-            title="Not signed in"
-            detail="Sign in via the header to access this page."
-          />
+          <div className="border-border rounded-2xl border p-10 text-center">
+            <p className="text-muted-foreground text-sm">
+              Sign in to manage recipes.
+            </p>
+          </div>
         </Unauthenticated>
 
         <Authenticated>
-          <AuthenticatedContent />
+          <RecipeList />
         </Authenticated>
       </div>
     </main>
   );
 }
 
-function AuthenticatedContent() {
-  const { user } = useUser();
+function RecipeList() {
   const recipes = useQuery(api.recipes.get);
 
+  if (recipes === undefined) {
+    return <RecipeListSkeleton />;
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Clerk status */}
-      <section className="rounded-xl border border-green-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-          <h2 className="font-semibold text-gray-800">Clerk — Authenticated</h2>
-        </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <dt className="text-gray-500">Name</dt>
-          <dd className="font-medium text-gray-900">{user?.fullName ?? "—"}</dd>
-          <dt className="text-gray-500">Email</dt>
-          <dd className="font-medium text-gray-900">
-            {user?.primaryEmailAddress?.emailAddress ?? "—"}
-          </dd>
-          <dt className="text-gray-500">User ID</dt>
-          <dd className="break-all font-mono text-xs text-gray-600">{user?.id}</dd>
-          <dt className="text-gray-500">Created</dt>
-          <dd className="text-gray-900">
-            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
-          </dd>
-        </dl>
-      </section>
+    <div className="border-border overflow-hidden rounded-2xl border">
+      {/* List header */}
+      <div className="border-border bg-muted/40 flex items-center justify-between border-b px-5 py-3">
+        <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+          Recipes
+        </span>
+        <Badge variant="secondary">{recipes.length}</Badge>
+      </div>
 
-      {/* Convex status */}
-      <section className="rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-2">
-          <span
-            className={`h-2.5 w-2.5 rounded-full ${
-              recipes === undefined ? "bg-yellow-400" : "bg-blue-500"
-            }`}
-          />
-          <h2 className="font-semibold text-gray-800">
-            Convex —{" "}
-            {recipes === undefined
-              ? "Fetching data..."
-              : `${recipes.length} recipes loaded`}
-          </h2>
-        </div>
-
-        {recipes === undefined ? (
-          <p className="text-sm text-gray-400">Loading from Convex...</p>
-        ) : (
-          <ul className="divide-y divide-gray-100">
-            {recipes.map((recipe) => (
-              <li key={recipe._id}>
-                <Link
-                  href={`/recipes/${recipe._id}`}
-                  className="flex items-start justify-between gap-4 py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
-                >
-                  <div>
-                    <p className="font-medium text-gray-900">{recipe.title}</p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Raw Convex document ID sample */}
-      {recipes && recipes.length > 0 && (
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-3 font-semibold text-gray-800">Sample Convex Document</h2>
-          <pre className="overflow-x-auto rounded-lg bg-gray-50 p-4 text-xs text-gray-700">
-            {JSON.stringify(recipes[0], null, 2)}
-          </pre>
-        </section>
+      {recipes.length === 0 ? (
+        <Empty className="rounded-none border-0 py-16">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChefHat />
+            </EmptyMedia>
+            <EmptyTitle>No recipes yet</EmptyTitle>
+            <EmptyDescription>
+              Add your first recipe to get started.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild size="sm">
+              <Link href="/recipes/new">
+                <Plus />
+                New Recipe
+              </Link>
+            </Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <ul>
+          {recipes.map((recipe, i) => (
+            <li key={recipe._id}>
+              {i > 0 && <Separator />}
+              <div className="hover:bg-muted/30 flex items-center justify-between gap-4 px-5 py-3.5 transition-colors">
+                <span className="text-foreground min-w-0 truncate text-sm font-medium">
+                  {recipe.title}
+                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button variant="outline" size="xs" asChild>
+                    <Link href={`/recipes/${recipe._id}`}>
+                      <Eye />
+                      View
+                    </Link>
+                  </Button>
+                  <Button variant="secondary" size="xs" asChild>
+                    <Link href={`/recipes/${recipe._id}/edit`}>
+                      <Pencil />
+                      Edit
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
 }
 
-function StatusCard({
-  status,
-  title,
-  detail,
-}: {
-  status: "loading" | "error" | "success";
-  title: string;
-  detail?: string;
-}) {
-  const colors = {
-    loading: "border-yellow-200 bg-yellow-50 text-yellow-800",
-    error: "border-red-200 bg-red-50 text-red-800",
-    success: "border-green-200 bg-green-50 text-green-800",
-  };
+function RecipeListSkeleton() {
   return (
-    <div className={`rounded-xl border p-6 ${colors[status]}`}>
-      <p className="font-semibold">{title}</p>
-      {detail && <p className="mt-1 text-sm opacity-80">{detail}</p>}
+    <div className="border-border overflow-hidden rounded-2xl border">
+      <div className="border-border bg-muted/40 flex items-center justify-between border-b px-5 py-3">
+        <Skeleton className="h-3.5 w-16" />
+        <Skeleton className="h-5 w-6 rounded-full" />
+      </div>
+      <ul>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <li key={i}>
+            {i > 0 && <Separator />}
+            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
+              <Skeleton className="h-4 w-48" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-6 w-14 rounded-2xl" />
+                <Skeleton className="h-6 w-12 rounded-2xl" />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

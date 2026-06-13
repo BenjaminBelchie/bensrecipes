@@ -59,6 +59,18 @@
       "sourceType": "github",
       "skillPath": "skills/features/clerk-webhooks/SKILL.md",
       "computedHash": "de12deda380be19d32d62c4106a6b78736cd4d9cc6dd5b214f6039853ad89e54"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "8f8bcc9024aa068245fac646d654a18c80280e4b06112ccd3e691a8c96cd66bd"
+    },
+    "unsplash": {
+      "source": "cevatkerim/skills",
+      "sourceType": "github",
+      "skillPath": "skills/unsplash/SKILL.md",
+      "computedHash": "2f124dcb8d877c676c8b03e741c6406180bebf3176a00440e454d587319931ee"
     }
   }
 }

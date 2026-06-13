@@ -3,36 +3,28 @@
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { DM_Serif_Display, Newsreader } from "next/font/google";
-import { api } from "../../../../convex/_generated/api";
-import { markdownToHtml } from "~/lib/markdownToHtml";
-
-const display = DM_Serif_Display({ subsets: ["latin"], weight: "400" });
-const body = Newsreader({ subsets: ["latin"], weight: ["400", "500"] });
-
-const PLACEHOLDER = `# Death by Chocolate Layer Cake
-
-A tall, rich, ultra-chocolatey layered cake.
-
----
-
-## Ingredients
-
-- 220g plain flour
-- 75g cocoa powder
-- 3 large eggs
-
-## Method
-
-1. Preheat oven to **170°C fan**.
-2. Mix dry ingredients together.
-3. Add wet ingredients and fold until combined.
-`;
+import { AlertCircle } from "lucide-react";
+import { api } from "~/convex/_generated/api";
+import { MarkdownRenderer } from "~/components/MarkdownRenderer";
+import { Button } from "~/components/ui/button";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "~/components/ui/resizable";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "~/components/ui/empty";
 
 /** Extract the first # H1 from markdown, fall back to first non-empty line */
 function extractTitle(md: string): string {
   for (const line of md.split("\n")) {
-    const h1 = /^#\s+(.*)/.exec(line);;
+    const h1 = /^#\s+(.*)/.exec(line);
     if (h1) return h1[1]!.trim();
     if (line.trim()) return line.trim().slice(0, 80);
   }
@@ -47,11 +39,16 @@ export default function NewRecipePage() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
 
-  const title = useMemo(() => (markdown.trim() ? extractTitle(markdown) : ""), [markdown]);
-  const previewHtml = useMemo(() => (markdown.trim() ? markdownToHtml(markdown) : ""), [markdown]);
+  const title = useMemo(
+    () => (markdown.trim() ? extractTitle(markdown) : ""),
+    [markdown],
+  );
 
   function handleSubmit() {
-    if (!markdown.trim()) { setError("Paste some markdown first."); return; }
+    if (!markdown.trim()) {
+      setError("Paste some markdown first.");
+      return;
+    }
     setError(null);
     startTransition(async () => {
       try {
@@ -64,78 +61,148 @@ export default function NewRecipePage() {
   }
 
   return (
-    <div className={`${body.className} min-h-screen`} style={{ background: "#f8f4ee" }}>
-      {/* Header */}
-      <header style={{ borderBottom: "1px solid #d8cfc4", background: "#f8f4ee", position: "sticky", top: 0, zIndex: 20 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span className={display.className} style={{ fontSize: "1.25rem", color: "#2d4a3e", letterSpacing: "-0.01em" }}>
+    <div className="bg-background flex min-h-screen flex-col">
+      {/* Sub-header */}
+      <div className="bg-background border-border sticky top-[57px] z-20 border-b">
+        <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-6">
+          <span className="font-heading text-foreground text-lg">
             {title || "New Recipe"}
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <button
-              onClick={handleSubmit}
-              disabled={isPending || !markdown.trim()}
-              style={{
-                background: markdown.trim() && !isPending ? "#2d4a3e" : "#a0998e",
-                color: "#f8f4ee", border: "none", borderRadius: 6,
-                padding: "0.45rem 1.25rem", fontSize: "0.875rem",
-                fontFamily: "inherit", cursor: markdown.trim() && !isPending ? "pointer" : "not-allowed",
-                transition: "background 0.15s", fontWeight: 500,
-              }}
-            >
-              {isPending ? "Saving…" : "Save Recipe →"}
-            </button>
-          </div>
+          <Button
+            onClick={handleSubmit}
+            disabled={isPending || !markdown.trim()}
+            size="sm"
+          >
+            {isPending ? "Saving…" : "Save Recipe →"}
+          </Button>
         </div>
-      </header>
+      </div>
 
-      {/* Mobile tabs */}
-      <div className="md:hidden" style={{ display: "flex", borderBottom: "1px solid #d8cfc4", background: "#f0ebe2" }}>
+      {/* Mobile: tab switcher */}
+      <div className="border-border bg-muted flex border-b md:hidden">
         {(["edit", "preview"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "0.65rem", fontSize: "0.8rem", fontFamily: "inherit", border: "none", background: tab === t ? "#f8f4ee" : "transparent", borderBottom: tab === t ? "2px solid #2d4a3e" : "2px solid transparent", color: tab === t ? "#2d4a3e" : "#8a7968", cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 500 }}>
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={[
+              "flex-1 py-2.5 text-xs font-medium tracking-widest uppercase transition-colors",
+              tab === t
+                ? "text-foreground border-primary bg-background border-b-2"
+                : "text-muted-foreground border-b-2 border-transparent",
+            ].join(" ")}
+          >
             {t === "edit" ? "Write" : "Preview"}
           </button>
         ))}
       </div>
 
-      {/* Split pane */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 57px)" }} className="max-md:block">
-        {/* Editor */}
-        <div className={tab === "preview" ? "hidden md:flex" : "flex"} style={{ flexDirection: "column", borderRight: "1px solid #d8cfc4" }}>
-          <div style={{ padding: "0.75rem 1.5rem", borderBottom: "1px solid #d8cfc4", background: "#f0ebe2", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a7968", fontWeight: 500 }}>Markdown</span>
-            <button onClick={() => setMarkdown(PLACEHOLDER)} style={{ fontSize: "0.75rem", color: "#5a7a6a", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              Load example
-            </button>
+      {/* Desktop: resizable split pane — both panels always rendered */}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="hidden flex-1 md:flex"
+      >
+        <ResizablePanel defaultSize={50} minSize={25}>
+          <div className="flex h-full flex-col">
+            <div className="bg-muted border-border flex items-center border-b px-6 py-2">
+              <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+                Markdown
+              </span>
+            </div>
+            <textarea
+              value={markdown}
+              onChange={(e) => setMarkdown(e.target.value)}
+              placeholder={
+                "Paste your recipe in markdown...\n\n# Recipe Title\n\n## Ingredients\n- item\n\n## Method\n1. Step one"
+              }
+              spellCheck={false}
+              className="text-foreground placeholder:text-muted-foreground caret-primary bg-background flex-1 resize-none border-none p-8 font-mono text-sm leading-relaxed outline-none"
+            />
+            {error && (
+              <Alert
+                variant="destructive"
+                className="rounded-none border-x-0 border-b-0"
+              >
+                <AlertCircle />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={50} minSize={25}>
+          <div className="h-full overflow-auto">
+            {!markdown.trim() ? (
+              <Empty className="h-full border-none">
+                <EmptyHeader>
+                  <EmptyMedia>📝</EmptyMedia>
+                  <EmptyTitle>Your recipe preview</EmptyTitle>
+                  <EmptyDescription>
+                    Paste any markdown on the left — any format works.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <div className="p-10">
+                <MarkdownRenderer
+                  content={markdown}
+                  className="prose prose-stone max-w-none"
+                />
+              </div>
+            )}
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+
+      {/* Mobile: single-panel view based on active tab */}
+      <div className="flex flex-1 flex-col md:hidden">
+        {/* Editor */}
+        <div
+          className={[
+            "flex flex-col",
+            tab === "preview" ? "hidden" : "flex flex-1",
+          ].join(" ")}
+        >
           <textarea
             value={markdown}
             onChange={(e) => setMarkdown(e.target.value)}
-            placeholder={"Paste your recipe in markdown...\n\n# Recipe Title\n\n## Ingredients\n- item\n\n## Method\n1. Step one"}
+            placeholder={
+              "Paste your recipe in markdown...\n\n# Recipe Title\n\n## Ingredients\n- item\n\n## Method\n1. Step one"
+            }
             spellCheck={false}
-            style={{ flex: 1, resize: "none", border: "none", outline: "none", padding: "2rem", fontSize: "0.875rem", lineHeight: 1.75, fontFamily: "'Courier New', Courier, monospace", background: "#f8f4ee", color: "#2c2417", caretColor: "#2d4a3e", minHeight: 500 }}
+            className="text-foreground placeholder:text-muted-foreground caret-primary bg-background min-h-[60vh] flex-1 resize-none border-none p-6 font-mono text-sm leading-relaxed outline-none"
           />
           {error && (
-            <div style={{ padding: "0.75rem 1.5rem", borderTop: "1px solid #e8b4b8", background: "#fdf0f0", color: "#8b2020", fontSize: "0.8rem" }}>
-              {error}
-            </div>
+            <Alert
+              variant="destructive"
+              className="rounded-none border-x-0 border-b-0"
+            >
+              <AlertCircle />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
         </div>
 
         {/* Preview */}
-        <div className={tab === "edit" ? "hidden md:block" : "block"} style={{ overflowY: "auto" }}>
-          {!previewHtml ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "4rem 2rem", gap: "0.75rem", color: "#a09080", textAlign: "center" }}>
-              <span style={{ fontSize: "2.5rem" }}>📝</span>
-              <p className={display.className} style={{ fontSize: "1.4rem", color: "#c0b09a" }}>Your recipe preview</p>
-              <p style={{ fontSize: "0.85rem", maxWidth: 280, lineHeight: 1.6 }}>Paste any markdown on the left — any format works.</p>
-            </div>
+        <div
+          className={[
+            tab === "edit" ? "hidden" : "block flex-1 overflow-auto",
+          ].join(" ")}
+        >
+          {!markdown.trim() ? (
+            <Empty className="min-h-[60vh] border-none">
+              <EmptyHeader>
+                <EmptyMedia>📝</EmptyMedia>
+                <EmptyTitle>Your recipe preview</EmptyTitle>
+                <EmptyDescription>
+                  Paste any markdown on the left — any format works.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <div style={{ padding: "2.5rem 3rem" }}>
-              <article
+            <div className="p-6">
+              <MarkdownRenderer
+                content={markdown}
                 className="prose prose-stone max-w-none"
-                style={{ "--tw-prose-headings": "#2d4a3e", "--tw-prose-body": "#2c2417", fontFamily: body.style.fontFamily } as React.CSSProperties}
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
             </div>
           )}
