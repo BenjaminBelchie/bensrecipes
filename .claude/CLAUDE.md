@@ -40,12 +40,13 @@ A personal recipe website where only I can upload and manage recipes I enjoy. Au
 Always run the following after making code changes:
 
 ```bash
-npm run lint        # ESLint — catch lint errors
+npm run build       # Full Next.js build — catches lint errors, type errors, and compile issues
 npm run format:write  # Prettier — auto-format changed files
 ```
 
-For type checking:
+For quick checks without a full build:
 
 ```bash
+npm run lint        # ESLint only
 npm run typecheck   # tsc --noEmit
 ```

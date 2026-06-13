@@ -98,7 +98,7 @@ export default function NewRecipePage() {
 
       {/* Desktop: resizable split pane — both panels always rendered */}
       <ResizablePanelGroup
-        direction="horizontal"
+        orientation="horizontal"
         className="hidden flex-1 md:flex"
       >
         <ResizablePanel defaultSize={50} minSize={25}>

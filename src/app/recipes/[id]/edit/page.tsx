@@ -142,7 +142,7 @@ export default function EditRecipePage() {
 
       {/* Desktop: resizable split pane */}
       <ResizablePanelGroup
-        direction="horizontal"
+        orientation="horizontal"
         className="hidden flex-1 md:flex"
       >
         <ResizablePanel defaultSize={50} minSize={25}>
