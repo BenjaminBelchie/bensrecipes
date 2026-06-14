@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "convex/react";
-import { Plus, Eye, Pencil, ChefHat } from "lucide-react";
+import { Plus, Eye, Pencil, ChefHat, Clipboard, ClipboardCheck } from "lucide-react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -16,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { DeleteRecipeButton } from "~/components/DeleteRecipeButton";
+import { RECIPE_PROMPT } from "~/lib/recipe-prompt";
 import {
   Empty,
   EmptyMedia,
@@ -28,6 +30,13 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export default function AdminPage() {
   const recipes = useQuery(api.recipes.get);
+  const [copied, setCopied] = useState(false);
+
+  async function copyPrompt() {
+    await navigator.clipboard.writeText(RECIPE_PROMPT);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -55,12 +64,25 @@ export default function AdminPage() {
               Manage your recipe collection
             </p>
           </div>
-          <Button asChild size="sm" aria-label="New Recipe">
-            <Link href="/recipes/new">
-              <Plus />
-              <span className="hidden md:inline">New Recipe</span>
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={copyPrompt}
+              aria-label="Copy recipe prompt"
+            >
+              {copied ? <ClipboardCheck /> : <Clipboard />}
+              <span className="hidden md:inline">
+                {copied ? "Copied!" : "Copy Prompt"}
+              </span>
+            </Button>
+            <Button asChild size="sm" aria-label="New Recipe">
+              <Link href="/recipes/new">
+                <Plus />
+                <span className="hidden md:inline">New Recipe</span>
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="border-border overflow-hidden rounded-2xl border">
