@@ -6,6 +6,15 @@ html {
   scroll-padding-top: 4rem;
 }
 
+/* Prevent iOS Safari auto-zoom on input focus (triggered when font-size < 16px) */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 /* ── View Transitions ───────────────────────────────────────── */
 
 /* Page content: old page fades out, new page fades in slightly offset */
