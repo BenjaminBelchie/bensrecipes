@@ -6,6 +6,14 @@ import { api } from "~/convex/_generated/api";
 import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import { Badge } from "~/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 
 export default async function RecipePage({
   params,
@@ -22,15 +30,26 @@ export default async function RecipePage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="mb-8">
-        <Link
-          href="/recipes"
-          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-        >
-          ← All Recipes
-        </Link>
-      </div>
+    <div className="mx-auto max-w-2xl px-4 py-6 md:py-12">
+      <Breadcrumb className="mb-8">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/recipes">Recipes</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="max-w-[200px] truncate">{recipe.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       {recipe.imageUrl && (
         <div
           className="relative mb-8 aspect-video w-full overflow-hidden rounded-2xl bg-black"

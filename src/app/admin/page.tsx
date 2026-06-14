@@ -7,6 +7,14 @@ import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 import { DeleteRecipeButton } from "~/components/DeleteRecipeButton";
 import {
   Empty,
@@ -23,7 +31,20 @@ export default function AdminPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto max-w-3xl px-6 py-6 md:py-12">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Admin</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         {/* Page header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -34,10 +55,10 @@ export default function AdminPage() {
               Manage your recipe collection
             </p>
           </div>
-          <Button asChild size="sm">
+          <Button asChild size="sm" aria-label="New Recipe">
             <Link href="/recipes/new">
               <Plus />
-              New Recipe
+              <span className="hidden md:inline">New Recipe</span>
             </Link>
           </Button>
         </div>
@@ -96,16 +117,16 @@ export default function AdminPage() {
                       {recipe.title}
                     </span>
                     <div className="flex shrink-0 items-center gap-2">
-                      <Button variant="outline" size="xs" asChild>
+                      <Button variant="outline" size="xs" asChild aria-label="View">
                         <Link href={`/recipes/${recipe._id}`}>
                           <Eye />
-                          View
+                          <span className="hidden md:inline">View</span>
                         </Link>
                       </Button>
-                      <Button variant="secondary" size="xs" asChild>
+                      <Button variant="secondary" size="xs" asChild aria-label="Edit">
                         <Link href={`/recipes/${recipe._id}/edit`}>
                           <Pencil />
-                          Edit
+                          <span className="hidden md:inline">Edit</span>
                         </Link>
                       </Button>
                       <DeleteRecipeButton id={recipe._id} title={recipe.title} />

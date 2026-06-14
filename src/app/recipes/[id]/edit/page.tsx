@@ -72,7 +72,12 @@ export default function EditRecipePage() {
       saveLabel="Save Changes →"
       error={error}
       onSave={handleSave}
-      onCancel={() => router.push(`/admin/`)}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Admin", href: "/admin" },
+        { label: recipe.title, href: `/recipes/${id}` },
+        { label: "Edit" },
+      ]}
     />
   );
 }

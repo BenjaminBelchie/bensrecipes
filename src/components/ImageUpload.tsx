@@ -60,11 +60,7 @@ export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
   }
 
   return (
-    <div className="border-border flex items-center gap-4 border-b px-6 py-3">
-      <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        Image
-      </span>
-
+    <div className="border-border flex items-center gap-2 border-b px-6 py-3">
       {preview ? (
         <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg">
           <Image
@@ -84,7 +80,7 @@ export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
         <Button
           type="button"
           variant="outline"
-          size="xs"
+          size="sm"
           disabled={uploading}
           onClick={() => inputRef.current?.click()}
         >
@@ -103,7 +99,7 @@ export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
           <Button
             type="button"
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={handleRemove}
           >
             <X />

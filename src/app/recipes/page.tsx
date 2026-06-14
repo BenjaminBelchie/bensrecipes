@@ -1,17 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import RecipeGrid from "~/components/RecipeGrid";
 import { api } from "~/convex/_generated/api";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 
 export default function RecipesPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const availableTags = useQuery(api.tags.list) ?? [];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-6 md:py-12">
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Recipes</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="mb-10">
         <h1 className="font-heading text-foreground mb-6 text-3xl font-bold">
           All Recipes

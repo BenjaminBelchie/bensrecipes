@@ -1,15 +1,24 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useSelector } from "@tanstack/react-store";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, Pencil, Save } from "lucide-react";
 import { type Id } from "~/convex/_generated/dataModel";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import { ImageUpload } from "~/components/ImageUpload";
 import { TagSelect } from "~/components/TagSelect";
+import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -37,6 +46,11 @@ interface InitialRecipe {
   tags?: string[];
 }
 
+export interface BreadcrumbEntry {
+  label: string;
+  href?: string;
+}
+
 interface RecipeEditorProps {
   initialRecipe?: InitialRecipe;
   /** Fallback header text when markdown has no title yet */
@@ -44,7 +58,7 @@ interface RecipeEditorProps {
   saveLabel: string;
   error: string | null;
   onSave: (data: RecipeEditorSaveData) => Promise<void>;
-  onCancel?: () => void;
+  breadcrumbs?: BreadcrumbEntry[];
 }
 
 function extractTitle(md: string): string {
@@ -62,7 +76,7 @@ export function RecipeEditor({
   saveLabel,
   error,
   onSave,
-  onCancel,
+  breadcrumbs,
 }: RecipeEditorProps) {
   const {
     markdown: initialMarkdown = "",
@@ -97,22 +111,69 @@ export function RecipeEditor({
 
   return (
     <div className="bg-background flex min-h-screen flex-col">
+      {/* Breadcrumb bar */}
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <div className="border-border border-b px-6 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrumbs.map((crumb, i) => {
+                const isLast = i === breadcrumbs.length - 1;
+                return (
+                  <Fragment key={crumb.label}>
+                    {i > 0 && <BreadcrumbSeparator />}
+                    <BreadcrumbItem>
+                      {isLast || !crumb.href ? (
+                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link href={crumb.href}>{crumb.label}</Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                  </Fragment>
+                );
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
       {/* Sub-header */}
-      <div className="bg-background border-border sticky top-[57px] z-20 border-b">
-        <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-6">
-          <span className="font-heading text-foreground text-lg">
+      <div className="bg-background sticky top-[57px] z-20 border-t border-b border-black/8">
+        <div className="mx-auto flex min-h-14 max-w-screen-xl items-center justify-between gap-4 px-6 py-3">
+          <span className="font-heading text-foreground min-w-0 truncate text-lg">
             {title || headerTitle}
           </span>
-          <div className="flex items-center gap-3">
-            {onCancel && (
-              <Button variant="outline" size="sm" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
+          <div className="flex items-center gap-2">
+            {/* Mobile: icon-only toggle */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setTab(tab === "edit" ? "preview" : "edit")}
+              aria-label={tab === "preview" ? "Edit" : "Preview"}
+            >
+              {tab === "preview" ? (
+                <Pencil className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+            {/* Mobile: icon-only save */}
             <Button
               onClick={() => void form.handleSubmit()}
               disabled={form.state.isSubmitting || !markdown.trim()}
               size="sm"
+              className="md:hidden"
+              aria-label={saveLabel}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            {/* Desktop: full save button */}
+            <Button
+              onClick={() => void form.handleSubmit()}
+              disabled={form.state.isSubmitting || !markdown.trim()}
+              size="sm"
+              className="hidden md:inline-flex"
             >
               {form.state.isSubmitting ? "Saving…" : saveLabel}
             </Button>
@@ -130,29 +191,12 @@ export function RecipeEditor({
         onChange={(v) => form.setFieldValue("tags", v)}
       />
 
-      {/* Mobile: tab switcher */}
-      <div className="border-border bg-muted flex border-b md:hidden">
-        {(["edit", "preview"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={[
-              "flex-1 py-2.5 text-xs font-medium tracking-widest uppercase transition-colors",
-              tab === t
-                ? "text-foreground border-primary bg-background border-b-2"
-                : "text-muted-foreground border-b-2 border-transparent",
-            ].join(" ")}
-          >
-            {t === "edit" ? "Write" : "Preview"}
-          </button>
-        ))}
-      </div>
-
       {/* Desktop: resizable split pane */}
-      <ResizablePanelGroup
-        orientation="horizontal"
-        className="hidden flex-1 md:flex"
-      >
+      <div className="hidden flex-1 md:flex">
+        <ResizablePanelGroup
+          orientation="horizontal"
+          className="flex-1"
+        >
         <ResizablePanel defaultSize={50} minSize={25}>
           <div className="flex h-full flex-col">
             <div className="bg-muted border-border flex items-center border-b px-6 py-2">
@@ -204,6 +248,7 @@ export function RecipeEditor({
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+      </div>
 
       {/* Mobile: single-panel view */}
       <div className="flex flex-1 flex-col md:hidden">

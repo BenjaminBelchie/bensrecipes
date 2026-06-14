@@ -46,6 +46,11 @@ export default function NewRecipePage() {
       saveLabel="Save Recipe →"
       error={error}
       onSave={handleSave}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Admin", href: "/admin" },
+        { label: "New Recipe" },
+      ]}
     />
   );
 }
