@@ -17,24 +17,22 @@ html {
 
 /* ── View Transitions ───────────────────────────────────────── */
 
-/* Page content: old page fades out, new page fades in slightly offset */
+/* Page content: simultaneous crossfade — no delay, no translateY jank */
 ::view-transition-old(root) {
-  animation: 180ms ease-in both vt-fade-out;
+  animation: 220ms ease-out both vt-fade-out;
 }
 ::view-transition-new(root) {
-  animation: 280ms ease-out 180ms both vt-fade-in;
+  animation: 280ms ease-out both vt-fade-in;
 }
 
 @keyframes vt-fade-out {
   to {
     opacity: 0;
-    transform: translateY(-6px);
   }
 }
 @keyframes vt-fade-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
   }
 }
 
@@ -48,10 +46,10 @@ html {
   animation: none;
 }
 
-/* Recipe image shared element morph — 400ms, smooth */
+/* Shared element morphs (image, title) — snappy spring-like easing */
 ::view-transition-group(*) {
-  animation-duration: 400ms;
-  animation-timing-function: ease-in-out;
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* Respect reduced-motion preference */

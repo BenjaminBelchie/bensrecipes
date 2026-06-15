@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import RecipeGrid from "~/components/RecipeGrid";
 import { api } from "~/convex/_generated/api";
 import { cn } from "~/lib/utils";
@@ -19,12 +20,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
+import { Input } from "~/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import {
   Select,
@@ -86,14 +82,25 @@ function FilterPanel({
 
   return (
     <div className="flex flex-col gap-5">
-      {activeFilters > 0 && (
-        <button
-          onClick={onClearAll}
-          className="text-muted-foreground hover:text-foreground self-start text-xs transition-colors"
-        >
-          Clear all filters
-        </button>
-      )}
+      <AnimatePresence initial={false}>
+        {activeFilters > 0 && (
+          <motion.div
+            key="clear-all"
+            initial={{ opacity: 0, height: 0, marginBottom: -8 }}
+            animate={{ opacity: 1, height: "auto", marginBottom: 0 }}
+            exit={{ opacity: 0, height: 0, marginBottom: -8 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <button
+              onClick={onClearAll}
+              className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+            >
+              Clear all filters
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tags */}
       <div>
@@ -218,6 +225,9 @@ export default function RecipesPage() {
   const [cuisine, setCuisine] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
 
   const availableTags = useQuery(api.tags.list) ?? [];
   const availableCuisines = useQuery(api.recipes.listCuisines) ?? [];
@@ -260,7 +270,7 @@ export default function RecipesPage() {
   };
 
   return (
-    <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+    <>
       <div className="mx-auto max-w-6xl px-6 py-6 md:py-12">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
@@ -277,25 +287,167 @@ export default function RecipesPage() {
         </Breadcrumb>
 
         {/* Title row with filter toggle */}
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="font-heading text-foreground text-3xl font-bold">
-            All Recipes
-          </h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleFilterToggle}
-            aria-label="Toggle filters"
-            className="flex items-center gap-1.5"
-          >
-            <SlidersHorizontal className="size-4" />
-            <span className="hidden sm:inline">Filters</span>
-            {activeFilters > 0 && (
-              <Badge className="flex size-5 items-center justify-center rounded-full p-0 text-[10px] leading-none">
-                {activeFilters}
-              </Badge>
+        <div className="mb-8">
+          {/* Desktop: title + search icon/bar + filter button on one row */}
+          <div className="hidden items-center gap-3 md:flex">
+            <h1 className="font-heading text-foreground shrink-0 text-3xl font-bold">
+              All Recipes
+            </h1>
+            <div className="flex flex-1 items-center justify-end gap-2">
+              {/* Animated search bar + icon toggle */}
+              <div className="flex items-center gap-1">
+                <AnimatePresence initial={false}>
+                  {desktopSearchOpen && (
+                    <motion.div
+                      key="desktop-search"
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 260, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <Input
+                        type="search"
+                        placeholder="Search recipes…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                        className="w-full appearance-none focus-visible:ring-0"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => {
+                    setDesktopSearchOpen((v) => !v);
+                    if (desktopSearchOpen) setSearchQuery("");
+                  }}
+                  aria-label={desktopSearchOpen ? "Close search" : "Search recipes"}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    {desktopSearchOpen ? (
+                      <motion.span
+                        key="close"
+                        initial={{ rotate: -90, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        exit={{ rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <X className="size-4" />
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="search"
+                        initial={{ rotate: 90, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        exit={{ rotate: -90, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <Search className="size-4" />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFilterToggle}
+                aria-label="Toggle filters"
+                className="flex shrink-0 items-center gap-1.5"
+              >
+                <SlidersHorizontal className="size-4" />
+                <span>Filters</span>
+                {activeFilters > 0 && (
+                  <Badge className="flex size-5 items-center justify-center rounded-full p-0 text-[10px] leading-none">
+                    {activeFilters}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile: title + search icon + filter button on one row */}
+          <div className="flex items-center justify-between md:hidden">
+            <h1 className="font-heading text-foreground text-3xl font-bold">
+              All Recipes
+            </h1>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => {
+                  setMobileSearchOpen((v) => !v);
+                  if (mobileSearchOpen) setSearchQuery("");
+                }}
+                aria-label={mobileSearchOpen ? "Close search" : "Search recipes"}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {mobileSearchOpen ? (
+                    <motion.span
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <X className="size-4" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="search"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Search className="size-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFilterToggle}
+                aria-label="Toggle filters"
+                className="flex items-center gap-1.5"
+              >
+                <SlidersHorizontal className="size-4" />
+                {activeFilters > 0 && (
+                  <Badge className="flex size-5 items-center justify-center rounded-full p-0 text-[10px] leading-none">
+                    {activeFilters}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile: animated search bar row */}
+          <AnimatePresence initial={false}>
+            {mobileSearchOpen && (
+              <motion.div
+                key="mobile-search"
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 12 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                style={{ overflow: "hidden" }}
+                className="md:hidden"
+              >
+                <Input
+                  type="search"
+                  placeholder="Search recipes…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  className="w-full appearance-none focus-visible:ring-0"
+                />
+              </motion.div>
             )}
-          </Button>
+          </AnimatePresence>
         </div>
 
         {/* Desktop: collapsible sidebar + recipe grid */}
@@ -316,6 +468,7 @@ export default function RecipesPage() {
               difficulty={difficulty}
               timeRange={timeRange}
               cuisine={cuisine}
+              searchQuery={searchQuery}
             />
           </div>
         </div>
@@ -327,19 +480,54 @@ export default function RecipesPage() {
             difficulty={difficulty}
             timeRange={timeRange}
             cuisine={cuisine}
+            searchQuery={searchQuery}
           />
         </div>
       </div>
 
       {/* Mobile filter sheet */}
-      <SheetContent side="left" className="w-80 overflow-y-auto">
-        <SheetHeader className="mb-2">
-          <SheetTitle>Filters</SheetTitle>
-        </SheetHeader>
-        <div className="px-6 pb-8">
-          <FilterPanel {...filterPanelProps} />
-        </div>
-      </SheetContent>
-    </Sheet>
+      <AnimatePresence>
+        {sheetOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              className="fixed inset-0 z-50 bg-black/30 supports-backdrop-filter:backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setSheetOpen(false)}
+            />
+            {/* Panel */}
+            <motion.div
+              key="panel"
+              className="bg-popover text-popover-foreground fixed inset-y-0 left-0 z-50 w-80 overflow-y-auto shadow-xl"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                <h2 className="font-heading text-foreground text-lg font-semibold">
+                  Filters
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSheetOpen(false)}
+                  aria-label="Close filters"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+              <div className="px-6 pb-8">
+                <FilterPanel {...filterPanelProps} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

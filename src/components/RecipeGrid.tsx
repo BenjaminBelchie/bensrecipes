@@ -13,17 +13,24 @@ export default function RecipeGrid({
   difficulty = "",
   timeRange = "",
   cuisine = "",
+  searchQuery = "",
 }: {
   selectedTags?: string[];
   difficulty?: string;
   timeRange?: string;
   cuisine?: string;
+  searchQuery?: string;
 }) {
   const allRecipes = useQuery(api.recipes.get);
 
   const recipes = useMemo(() => {
     if (!allRecipes) return allRecipes;
     return allRecipes.filter((recipe) => {
+      if (
+        searchQuery.trim() &&
+        !recipe.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+        return false;
       if (
         selectedTags.length > 0 &&
         !selectedTags.every((t) => recipe.tags?.includes(t))
@@ -42,7 +49,7 @@ export default function RecipeGrid({
         return false;
       return true;
     });
-  }, [allRecipes, selectedTags, difficulty, timeRange, cuisine]);
+  }, [allRecipes, selectedTags, difficulty, timeRange, cuisine, searchQuery]);
 
   if (recipes === undefined || recipes === null) {
     return (
@@ -112,7 +119,10 @@ export default function RecipeGrid({
 
           {/* Title + tags */}
           <div className="p-5">
-            <h3 className="font-heading text-card-foreground group-hover:text-primary text-lg leading-tight font-bold transition-colors duration-200">
+            <h3
+              className="font-heading text-card-foreground group-hover:text-primary text-lg leading-tight font-bold transition-colors duration-200"
+              style={{ viewTransitionName: `recipe-title-${recipe._id}` }}
+            >
               {recipe.title}
             </h3>
             {recipe.tags && recipe.tags.length > 0 && (

@@ -65,6 +65,12 @@ export default async function RecipePage({
           />
         </div>
       )}
+      <h1
+        className="font-heading text-foreground mb-6 text-3xl font-bold leading-tight"
+        style={{ viewTransitionName: `recipe-title-${recipe._id}` }}
+      >
+        {recipe.title}
+      </h1>
       {recipe.tags && recipe.tags.length > 0 && (
         <div className="mb-8 flex flex-wrap gap-2">
           {recipe.tags.map((tag) => (
@@ -75,7 +81,7 @@ export default async function RecipePage({
         </div>
       )}
       <MarkdownRenderer
-        content={recipe.content}
+        content={recipe.content.replace(/^#[^\n]*\n?/, "")}
         className="prose prose-stone max-w-none"
       />
     </div>
