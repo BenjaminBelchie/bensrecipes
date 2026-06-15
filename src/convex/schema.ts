@@ -8,6 +8,11 @@ export default defineSchema({
     imageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     authorId: v.optional(v.string()),
+    difficulty: v.optional(
+      v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
+    ),
+    totalTime: v.optional(v.number()),
+    cuisine: v.optional(v.string()),
   })
     .searchIndex("search_title", { searchField: "title" })
     .index("by_author", ["authorId"]),

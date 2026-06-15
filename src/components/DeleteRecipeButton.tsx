@@ -43,7 +43,12 @@ export function DeleteRecipeButton({ id, title }: DeleteRecipeButtonProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="xs" disabled={isPending} aria-label="Delete">
+        <Button
+          variant="destructive"
+          size="xs"
+          disabled={isPending}
+          aria-label="Delete"
+        >
           <Trash2 />
           <span className="hidden md:inline">Delete</span>
         </Button>

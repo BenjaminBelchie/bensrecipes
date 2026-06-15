@@ -46,7 +46,9 @@ export default async function RecipePage({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-[200px] truncate">{recipe.title}</BreadcrumbPage>
+            <BreadcrumbPage className="max-w-[200px] truncate">
+              {recipe.title}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -59,7 +61,7 @@ export default async function RecipePage({
             src={recipe.imageUrl}
             alt={recipe.title}
             fill
-            className="object-contain"
+            className="object-cover"
           />
         </div>
       )}

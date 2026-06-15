@@ -23,6 +23,9 @@ export default function EditRecipePage() {
     markdown,
     imageId,
     tags,
+    difficulty,
+    totalTime,
+    cuisine,
   }: RecipeEditorSaveData) {
     if (!markdown.trim()) {
       setError("Recipe content cannot be empty.");
@@ -36,6 +39,9 @@ export default function EditRecipePage() {
         content: markdown,
         ...(imageId ? { imageId } : {}),
         ...(tags.length > 0 ? { tags } : {}),
+        ...(difficulty ? { difficulty } : {}),
+        ...(totalTime ? { totalTime } : {}),
+        ...(cuisine ? { cuisine } : {}),
       });
       toast.success("Recipe updated!");
       router.push(`/admin`);
@@ -67,6 +73,9 @@ export default function EditRecipePage() {
         imageId: recipe.imageId ?? null,
         imageUrl: recipe.imageUrl ?? null,
         tags: recipe.tags ?? [],
+        difficulty: recipe.difficulty,
+        totalTime: recipe.totalTime,
+        cuisine: recipe.cuisine,
       }}
       headerTitle="Edit Recipe"
       saveLabel="Save Changes →"

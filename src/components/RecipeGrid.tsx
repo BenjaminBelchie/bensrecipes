@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,15 +10,39 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export default function RecipeGrid({
   selectedTags = [],
+  difficulty = "",
+  timeRange = "",
+  cuisine = "",
 }: {
   selectedTags?: string[];
+  difficulty?: string;
+  timeRange?: string;
+  cuisine?: string;
 }) {
   const allRecipes = useQuery(api.recipes.get);
 
-  const recipes =
-    allRecipes && selectedTags.length > 0
-      ? allRecipes.filter((r) => selectedTags.every((t) => r.tags?.includes(t)))
-      : allRecipes;
+  const recipes = useMemo(() => {
+    if (!allRecipes) return allRecipes;
+    return allRecipes.filter((recipe) => {
+      if (
+        selectedTags.length > 0 &&
+        !selectedTags.every((t) => recipe.tags?.includes(t))
+      )
+        return false;
+      if (difficulty && recipe.difficulty !== difficulty) return false;
+      if (timeRange) {
+        const t = recipe.totalTime;
+        if (t === undefined || t === null) return false;
+        if (timeRange === "lt15" && t >= 15) return false;
+        if (timeRange === "15to30" && (t < 15 || t > 30)) return false;
+        if (timeRange === "30to60" && (t < 30 || t > 60)) return false;
+        if (timeRange === "gt60" && t <= 60) return false;
+      }
+      if (cuisine && recipe.cuisine?.toLowerCase() !== cuisine.toLowerCase())
+        return false;
+      return true;
+    });
+  }, [allRecipes, selectedTags, difficulty, timeRange, cuisine]);
 
   if (recipes === undefined || recipes === null) {
     return (
@@ -72,7 +97,7 @@ export default function RecipeGrid({
                 src={recipe.imageUrl}
                 alt={recipe.title}
                 fill
-                className="object-contain"
+                className="object-cover"
               />
             </div>
           ) : (

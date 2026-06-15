@@ -85,7 +85,7 @@ export function TagSelect({ value, onChange }: TagSelectProps) {
                     type="button"
                     onClick={() => onChange(value.filter((t) => t !== tag))}
                     aria-label={`Remove ${tag}`}
-                    className="hover:opacity-70 transition-opacity"
+                    className="transition-opacity hover:opacity-70"
                   >
                     <X className="size-3" />
                   </button>

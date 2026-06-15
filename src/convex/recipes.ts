@@ -44,6 +44,11 @@ export const create = mutation({
     content: v.string(),
     imageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
+    difficulty: v.optional(
+      v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
+    ),
+    totalTime: v.optional(v.number()),
+    cuisine: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -62,11 +67,39 @@ export const update = mutation({
     content: v.string(),
     imageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
+    difficulty: v.optional(
+      v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
+    ),
+    totalTime: v.optional(v.number()),
+    cuisine: v.optional(v.string()),
   },
-  handler: async (ctx, { id, title, content, imageId, tags }) => {
+  handler: async (
+    ctx,
+    { id, title, content, imageId, tags, difficulty, totalTime, cuisine },
+  ) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    await ctx.db.patch(id, { title, content, imageId, tags });
+    await ctx.db.patch(id, {
+      title,
+      content,
+      imageId,
+      tags,
+      difficulty,
+      totalTime,
+      cuisine,
+    });
+  },
+});
+
+export const listCuisines = query({
+  args: {},
+  handler: async (ctx) => {
+    const recipes = await ctx.db.query("recipes").collect();
+    const seen = new Set<string>();
+    for (const recipe of recipes) {
+      if (recipe.cuisine) seen.add(recipe.cuisine);
+    }
+    return [...seen].sort();
   },
 });
 

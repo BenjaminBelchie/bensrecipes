@@ -31,12 +31,20 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "~/components/ui/empty";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+
+export type RecipeDifficulty = "easy" | "medium" | "hard";
 
 export interface RecipeEditorSaveData {
   title: string;
   markdown: string;
   imageId: Id<"_storage"> | null;
   tags: string[];
+  difficulty?: RecipeDifficulty;
+  totalTime?: number;
+  cuisine?: string;
 }
 
 interface InitialRecipe {
@@ -44,6 +52,9 @@ interface InitialRecipe {
   imageId?: Id<"_storage"> | null;
   imageUrl?: string | null;
   tags?: string[];
+  difficulty?: RecipeDifficulty;
+  totalTime?: number;
+  cuisine?: string;
 }
 
 export interface BreadcrumbEntry {
@@ -70,6 +81,10 @@ function extractTitle(md: string): string {
   return "Untitled Recipe";
 }
 
+function toDifficulty(v: string): RecipeDifficulty | undefined {
+  return v === "easy" || v === "medium" || v === "hard" ? v : undefined;
+}
+
 export function RecipeEditor({
   initialRecipe,
   headerTitle,
@@ -83,12 +98,18 @@ export function RecipeEditor({
     imageId: initialImageId = null,
     imageUrl: initialImageUrl = null,
     tags: initialTags = [],
+    difficulty: initialDifficulty,
+    totalTime: initialTotalTime,
+    cuisine: initialCuisine = "",
   } = initialRecipe ?? {};
   const form = useForm({
     defaultValues: {
       markdown: initialMarkdown,
       imageId: initialImageId,
       tags: initialTags,
+      difficulty: initialDifficulty ?? "",
+      totalTime: initialTotalTime,
+      cuisine: initialCuisine,
     },
     onSubmit: async ({ value }) => {
       await onSave({
@@ -96,12 +117,18 @@ export function RecipeEditor({
         markdown: value.markdown,
         imageId: value.imageId,
         tags: value.tags,
+        difficulty: toDifficulty(value.difficulty),
+        totalTime: value.totalTime ?? undefined,
+        cuisine: value.cuisine ?? undefined,
       });
     },
   });
 
   const markdown = useSelector(form.store, (s) => s.values.markdown);
   const tags = useSelector(form.store, (s) => s.values.tags);
+  const difficulty = useSelector(form.store, (s) => s.values.difficulty);
+  const totalTime = useSelector(form.store, (s) => s.values.totalTime);
+  const cuisine = useSelector(form.store, (s) => s.values.cuisine);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
 
   const title = useMemo(
@@ -186,68 +213,131 @@ export function RecipeEditor({
         onUpload={(newId) => form.setFieldValue("imageId", newId)}
       />
 
-      <TagSelect
-        value={tags}
-        onChange={(v) => form.setFieldValue("tags", v)}
-      />
+      <TagSelect value={tags} onChange={(v) => form.setFieldValue("tags", v)} />
+
+      {/* Details: difficulty, total time, cuisine */}
+      <div className="border-border border-b px-6 py-4">
+        <p className="text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase">
+          Details
+        </p>
+        <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
+          {/* Difficulty */}
+          <div className="flex flex-col gap-2">
+            <Label className="text-muted-foreground text-xs font-medium">
+              Difficulty
+            </Label>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={difficulty}
+              onValueChange={(v) => form.setFieldValue("difficulty", v)}
+            >
+              <ToggleGroupItem value="easy">Easy</ToggleGroupItem>
+              <ToggleGroupItem value="medium">Medium</ToggleGroupItem>
+              <ToggleGroupItem value="hard">Hard</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
+          {/* Total Time */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="recipe-total-time"
+              className="text-muted-foreground text-xs font-medium"
+            >
+              Total Time (min)
+            </Label>
+            <Input
+              id="recipe-total-time"
+              type="number"
+              min={1}
+              placeholder="e.g. 30"
+              className="w-28"
+              value={totalTime ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                form.setFieldValue(
+                  "totalTime",
+                  val ? parseInt(val, 10) : undefined,
+                );
+              }}
+            />
+          </div>
+
+          {/* Cuisine */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="recipe-cuisine"
+              className="text-muted-foreground text-xs font-medium"
+            >
+              Cuisine
+            </Label>
+            <Input
+              id="recipe-cuisine"
+              type="text"
+              placeholder="e.g. Italian"
+              className="w-36"
+              value={cuisine ?? ""}
+              onChange={(e) => form.setFieldValue("cuisine", e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Desktop: resizable split pane */}
       <div className="hidden flex-1 md:flex">
-        <ResizablePanelGroup
-          orientation="horizontal"
-          className="flex-1"
-        >
-        <ResizablePanel defaultSize={50} minSize={25}>
-          <div className="flex h-full flex-col">
-            <div className="bg-muted border-border flex items-center border-b px-6 py-2">
-              <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-                Markdown
-              </span>
-            </div>
-            <textarea
-              value={markdown}
-              onChange={(e) => form.setFieldValue("markdown", e.target.value)}
-              placeholder={
-                "Paste your recipe in markdown...\n\n# Recipe Title\n\n## Ingredients\n- item\n\n## Method\n1. Step one"
-              }
-              spellCheck={false}
-              className="text-foreground placeholder:text-muted-foreground caret-primary bg-background flex-1 resize-none border-none p-8 font-mono text-sm leading-relaxed outline-none"
-            />
-            {error && (
-              <Alert
-                variant="destructive"
-                className="rounded-none border-x-0 border-b-0"
-              >
-                <AlertCircle />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={50} minSize={25}>
-          <div className="h-full overflow-auto">
-            {!markdown.trim() ? (
-              <Empty className="h-full border-none">
-                <EmptyHeader>
-                  <EmptyMedia>📝</EmptyMedia>
-                  <EmptyTitle>Recipe preview</EmptyTitle>
-                  <EmptyDescription>
-                    Paste any markdown on the left — any format works.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <div className="p-10">
-                <MarkdownRenderer
-                  content={markdown}
-                  className="prose prose-stone max-w-none"
-                />
+        <ResizablePanelGroup orientation="horizontal" className="flex-1">
+          <ResizablePanel defaultSize={50} minSize={25}>
+            <div className="flex h-full flex-col">
+              <div className="bg-muted border-border flex items-center border-b px-6 py-2">
+                <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+                  Markdown
+                </span>
               </div>
-            )}
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+              <textarea
+                value={markdown}
+                onChange={(e) => form.setFieldValue("markdown", e.target.value)}
+                placeholder={
+                  "Paste your recipe in markdown...\n\n# Recipe Title\n\n## Ingredients\n- item\n\n## Method\n1. Step one"
+                }
+                spellCheck={false}
+                className="text-foreground placeholder:text-muted-foreground caret-primary bg-background flex-1 resize-none border-none p-8 font-mono text-sm leading-relaxed outline-none"
+              />
+              {error && (
+                <Alert
+                  variant="destructive"
+                  className="rounded-none border-x-0 border-b-0"
+                >
+                  <AlertCircle />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={50} minSize={25}>
+            <div className="h-full overflow-auto">
+              {!markdown.trim() ? (
+                <Empty className="h-full border-none">
+                  <EmptyHeader>
+                    <EmptyMedia>📝</EmptyMedia>
+                    <EmptyTitle>Recipe preview</EmptyTitle>
+                    <EmptyDescription>
+                      Paste any markdown on the left — any format works.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                <div className="p-10">
+                  <MarkdownRenderer
+                    content={markdown}
+                    className="prose prose-stone max-w-none"
+                  />
+                </div>
+              )}
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
       {/* Mobile: single-panel view */}

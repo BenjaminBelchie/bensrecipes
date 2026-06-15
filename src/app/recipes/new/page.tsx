@@ -20,6 +20,9 @@ export default function NewRecipePage() {
     markdown,
     imageId,
     tags,
+    difficulty,
+    totalTime,
+    cuisine,
   }: RecipeEditorSaveData) {
     if (!markdown.trim()) {
       setError("Paste some markdown first.");
@@ -32,6 +35,9 @@ export default function NewRecipePage() {
         content: markdown,
         ...(imageId ? { imageId } : {}),
         ...(tags.length > 0 ? { tags } : {}),
+        ...(difficulty ? { difficulty } : {}),
+        ...(totalTime ? { totalTime } : {}),
+        ...(cuisine ? { cuisine } : {}),
       });
       toast.success("Recipe created successfully!");
       router.push(`/admin/`);

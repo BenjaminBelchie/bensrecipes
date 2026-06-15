@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "convex/react";
-import { Plus, Eye, Pencil, ChefHat, Clipboard, ClipboardCheck } from "lucide-react";
+import {
+  Plus,
+  Eye,
+  Pencil,
+  ChefHat,
+  Clipboard,
+  ClipboardCheck,
+} from "lucide-react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -99,7 +106,10 @@ export default function AdminPage() {
           {recipes === undefined ? (
             <div className="divide-border divide-y">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between gap-4 px-5 py-3.5">
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-4 px-5 py-3.5"
+                >
                   <Skeleton className="h-4 w-48" />
                   <div className="flex gap-2">
                     <Skeleton className="h-7 w-14" />
@@ -139,19 +149,32 @@ export default function AdminPage() {
                       {recipe.title}
                     </span>
                     <div className="flex shrink-0 items-center gap-2">
-                      <Button variant="outline" size="xs" asChild aria-label="View">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        asChild
+                        aria-label="View"
+                      >
                         <Link href={`/recipes/${recipe._id}`}>
                           <Eye />
                           <span className="hidden md:inline">View</span>
                         </Link>
                       </Button>
-                      <Button variant="secondary" size="xs" asChild aria-label="Edit">
+                      <Button
+                        variant="secondary"
+                        size="xs"
+                        asChild
+                        aria-label="Edit"
+                      >
                         <Link href={`/recipes/${recipe._id}/edit`}>
                           <Pencil />
                           <span className="hidden md:inline">Edit</span>
                         </Link>
                       </Button>
-                      <DeleteRecipeButton id={recipe._id} title={recipe.title} />
+                      <DeleteRecipeButton
+                        id={recipe._id}
+                        title={recipe.title}
+                      />
                     </div>
                   </div>
                 </li>
