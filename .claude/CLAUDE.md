@@ -24,7 +24,11 @@ A personal recipe website where only I can upload and manage recipes I enjoy. Au
 - **`clerk-nextjs-patterns`** — Use for Next.js-specific Clerk patterns (middleware, Server Actions, caching).
 - **`ui-primitives`** — **Always invoke first before writing any UI code.** Evaluate the requested UI against the available primitive components in `src/components/ui` and reuse them before writing custom markup. This is the single source of truth for what's already built.
 - **`shadcn`** — Invoke after `ui-primitives` when a needed component is NOT already in `src/components/ui`. Check whether a shadcn component exists for the use case and add it before writing custom markup.
-- **`frontend-design`** — Use when building or updating UI components and pages (invoke after `ui-primitives` and `shadcn` to layer in design decisions on top of primitives).
+- **`ui-ux-pro-max`** — Use when building or updating UI components and pages (invoke after `ui-primitives` and `shadcn` to layer in design decisions on top of primitives). Covers 50+ styles, color palettes, font pairings, UX guidelines, and layout systems.
+- **`ui-styling`** — Use for detailed shadcn/ui + Tailwind CSS styling, theme customization, dark mode, and accessible component patterns.
+- **`design-system`** — Use when establishing or updating design tokens, CSS variable systems, spacing/typography scales, or component specs.
+- **`brand`** — Use for brand voice, visual identity standards, and style guide decisions.
+- **`design`** — Use for comprehensive design work: logos, banners, icons, social images, or full brand identity.
 - **`unsplash`** — Use when images are needed in UI (recipe covers, backgrounds, etc.). Always use this skill to source photos rather than placeholder URLs.
 - **`plan-with-me`** — Use when implementing new features to create a solid plan before implementing any code.
 - **`react-best-practices`** — Use when writing any React code.

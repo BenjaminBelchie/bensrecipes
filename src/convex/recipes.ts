@@ -4,7 +4,7 @@ import { v } from "convex/values";
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    const recipes = await ctx.db.query("recipes").collect();
+    const recipes = await ctx.db.query("recipes").order("desc").collect();
     return Promise.all(
       recipes.map(async (recipe) => {
         const imageUrl = recipe.imageId
