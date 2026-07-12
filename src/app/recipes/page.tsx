@@ -324,7 +324,9 @@ export default function RecipesPage() {
                     setDesktopSearchOpen((v) => !v);
                     if (desktopSearchOpen) setSearchQuery("");
                   }}
-                  aria-label={desktopSearchOpen ? "Close search" : "Search recipes"}
+                  aria-label={
+                    desktopSearchOpen ? "Close search" : "Search recipes"
+                  }
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {desktopSearchOpen ? (
@@ -382,7 +384,9 @@ export default function RecipesPage() {
                   setMobileSearchOpen((v) => !v);
                   if (mobileSearchOpen) setSearchQuery("");
                 }}
-                aria-label={mobileSearchOpen ? "Close search" : "Search recipes"}
+                aria-label={
+                  mobileSearchOpen ? "Close search" : "Search recipes"
+                }
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {mobileSearchOpen ? (
