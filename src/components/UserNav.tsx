@@ -4,22 +4,16 @@ import { UserButton, SignInButton, useAuth } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated } from "convex/react";
 import Link from "next/link";
 import { useOnline } from "~/hooks/use-online";
+import { PwaTools } from "~/components/PwaTools";
 
 export function UserNav() {
   const online = useOnline();
   const { sessionClaims } = useAuth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
-  if (!online) return null;
+  if (!online) return <PwaTools />;
 
   return (
-    <div className="flex items-center gap-6 text-sm">
-      <Unauthenticated>
-        <SignInButton>
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
-            Sign in
-          </button>
-        </SignInButton>
-      </Unauthenticated>
+    <div className="flex items-center gap-2 text-sm sm:gap-6">
       <Authenticated>
         {isAdmin && (
           <Link
@@ -29,6 +23,16 @@ export function UserNav() {
             Admin
           </Link>
         )}
+      </Authenticated>
+      <PwaTools />
+      <Unauthenticated>
+        <SignInButton>
+          <button className="text-muted-foreground hover:text-foreground transition-colors">
+            Sign in
+          </button>
+        </SignInButton>
+      </Unauthenticated>
+      <Authenticated>
         <UserButton />
       </Authenticated>
     </div>

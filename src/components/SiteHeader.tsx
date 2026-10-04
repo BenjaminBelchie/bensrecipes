@@ -34,8 +34,7 @@ export function SiteHeader({ children }: { children?: ReactNode }) {
           >
             Recipes
           </Link>
-          {children}
-          <PwaTools />
+          {children ?? <PwaTools />}
         </nav>
       </div>
     </header>
