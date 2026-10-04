@@ -12,7 +12,7 @@ import { PHOTO_CACHE } from "~/lib/offline-images";
 import { RecipeContent } from "~/components/RecipeContent";
 import RecipesPage from "~/app/(site)/recipes/page";
 import { RecipeDataContext } from "~/components/RecipeDataProvider";
-import { PwaTools } from "~/components/PwaTools";
+import { SiteHeader } from "~/components/SiteHeader";
 import {
   Empty,
   EmptyHeader,
@@ -75,52 +75,51 @@ export function OfflineApp() {
       window.removeEventListener("online", reconnect);
     };
   }, []);
-  if (!loaded)
-    return (
-      <p className="p-6" role="status">
-        Loading saved recipes...
-      </p>
-    );
-  if (!snapshot)
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No saved recipes</EmptyTitle>
-          <EmptyDescription>
-            Connect to download the recipe collection.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
   const id = /^\/recipes\/([a-z0-9]{32})$/.exec(pathname)?.[1];
-  const recipe = snapshot.recipes.find((entry) => entry._id === id);
-  if (id && !recipe)
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>Recipe unavailable offline</EmptyTitle>
-          <EmptyDescription>
-            <Link
-              href="/recipes"
-              prefetch={false}
-              onClick={(event) => {
-                event.preventDefault();
-                window.location.assign("/recipes");
-              }}
-            >
-              Back to recipes
-            </Link>
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
+  const recipe = snapshot?.recipes.find((entry) => entry._id === id);
+  const content = !loaded ? (
+    <p className="p-6" role="status">
+      Loading saved recipes...
+    </p>
+  ) : !snapshot ? (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>No saved recipes</EmptyTitle>
+        <EmptyDescription>
+          Connect to download the recipe collection.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  ) : id && !recipe ? (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>Recipe unavailable offline</EmptyTitle>
+        <EmptyDescription>
+          <Link
+            href="/recipes"
+            prefetch={false}
+            onClick={(event) => {
+              event.preventDefault();
+              window.location.assign("/recipes");
+            }}
+          >
+            Back to recipes
+          </Link>
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  ) : recipe ? (
+    <RecipeContent recipe={recipe} offline />
+  ) : (
+    <RecipesPage />
+  );
   return (
     <RecipeDataContext.Provider
       value={{
         snapshot,
         loaded,
         offline: true,
-        savedAt: snapshot.syncedAt,
+        savedAt: snapshot?.syncedAt,
         clear: async () => {
           await clearSnapshot();
           await caches.delete(PHOTO_CACHE);
@@ -132,8 +131,8 @@ export function OfflineApp() {
           ),
       }}
     >
-      <PwaTools />
-      {recipe ? <RecipeContent recipe={recipe} offline /> : <RecipesPage />}
+      <SiteHeader />
+      <main>{content}</main>
     </RecipeDataContext.Provider>
   );
 }

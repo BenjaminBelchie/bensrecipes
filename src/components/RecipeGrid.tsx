@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { filterRecipes } from "~/lib/recipe-filters";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 
 export default function RecipeGrid({
   selectedTags = [],
@@ -72,26 +73,26 @@ export default function RecipeGrid({
   }
 
   return (
-    <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <motion.div
+      layout
+      className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    >
       <AnimatePresence mode="popLayout" initial={false}>
         {recipes.map((recipe) => (
           <motion.div
             key={recipe._id}
+            className="flex min-w-0"
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
           >
-            <Link
-              href={`/recipes/${recipe._id}`}
-              prefetch={!offline}
-              className="group border-border bg-card hover:shadow-primary/10 relative block overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-            >
+            <div className="group border-border bg-card hover:shadow-primary/10 relative flex h-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
               {/* Image / placeholder */}
               {recipe.imageUrl ? (
                 <div
-                  className="relative aspect-[4/3] overflow-hidden bg-black"
+                  className="relative aspect-[4/3] shrink-0 overflow-hidden bg-black"
                   style={{ viewTransitionName: `recipe-image-${recipe._id}` }}
                 >
                   <RecipePhoto
@@ -102,7 +103,7 @@ export default function RecipeGrid({
                   />
                 </div>
               ) : (
-                <div className="relative aspect-[4/3] overflow-hidden">
+                <div className="relative aspect-[4/3] shrink-0 overflow-hidden">
                   <div className="from-primary/8 via-primary/12 to-primary/5 flex h-full w-full items-center justify-center bg-gradient-to-br">
                     <span className="font-heading text-primary/20 text-6xl font-black">
                       ✦
@@ -112,27 +113,41 @@ export default function RecipeGrid({
               )}
 
               {/* Title + tags */}
-              <div className="p-5">
+              <div className="flex min-w-0 flex-1 flex-col p-5">
                 <h3
                   className="font-heading text-card-foreground group-hover:text-primary text-lg leading-tight font-bold transition-colors duration-200"
                   style={{ viewTransitionName: `recipe-title-${recipe._id}` }}
                 >
-                  {recipe.title}
+                  <Link
+                    href={`/recipes/${recipe._id}`}
+                    prefetch={!offline}
+                    draggable={false}
+                    className="after:absolute after:inset-0"
+                  >
+                    {recipe.title}
+                  </Link>
                 </h3>
                 {recipe.tags && recipe.tags.length > 0 && (
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {recipe.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+                  <ScrollArea className="relative z-10 mt-auto w-full cursor-auto pt-2.5">
+                    <div className="flex w-max flex-nowrap gap-1.5 pb-3">
+                      {recipe.tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="shrink-0 text-xs"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 )}
               </div>
 
               {/* Bottom accent bar that slides in on hover */}
               <div className="bg-primary absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
-            </Link>
+            </div>
           </motion.div>
         ))}
       </AnimatePresence>

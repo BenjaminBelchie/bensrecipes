@@ -8,6 +8,7 @@ import {
   WifiOff,
   CloudCheck,
   CircleAlert,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRecipes } from "~/components/RecipeDataProvider";
@@ -20,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "~/components/ui/dialog";
 import {
   AlertDialog,
@@ -91,50 +93,123 @@ export function PwaTools() {
             ? "Recipes saved; photos incomplete"
             : "Not downloaded");
   return (
-    <div className="border-border border-b">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6">
-        <div
-          className="text-muted-foreground flex min-w-0 flex-1 items-center gap-2 text-xs"
-          role="status"
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          title="Settings"
+          aria-label="Settings"
+          className="text-muted-foreground hover:text-foreground"
         >
-          {data.error ? (
-            <CircleAlert className="size-4 shrink-0" />
-          ) : data.offline ? (
-            <WifiOff className="size-4 shrink-0" />
-          ) : (
-            <CloudCheck className="size-4 shrink-0" />
-          )}
-          <span
-            className="min-w-0 break-words"
-            title={
-              data.savedAt
-                ? `Last saved ${new Date(data.savedAt).toLocaleString()}`
-                : undefined
-            }
+          <Settings />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>
+            Ben&apos;s Recipes on this device.
+          </DialogDescription>
+        </DialogHeader>
+        <section
+          className="min-w-0 space-y-4"
+          aria-labelledby="device-data-title"
+        >
+          <h2 id="device-data-title" className="font-medium">
+            Data on This Device
+          </h2>
+          <div
+            className="text-muted-foreground flex min-w-0 items-center gap-2 text-sm"
+            role="status"
           >
-            {label}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {data.retry && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              title="Sync recipes"
-              aria-label="Sync recipes"
-              disabled={!online || data.syncing}
-              onClick={() => {
-                void navigator.storage?.persist?.().catch(() => false);
-                data.retry?.();
-              }}
-            >
-              <RefreshCw className={data.syncing ? "animate-spin" : ""} />
-            </Button>
+            {data.error ? (
+              <CircleAlert className="size-4 shrink-0" />
+            ) : data.offline ? (
+              <WifiOff className="size-4 shrink-0" />
+            ) : (
+              <CloudCheck className="size-4 shrink-0" />
+            )}
+            <span className="min-w-0 break-words">{label}</span>
+          </div>
+          {data.savedAt && (
+            <p className="text-muted-foreground text-xs">
+              Last saved {new Date(data.savedAt).toLocaleString()}
+            </p>
           )}
-          {!standalone && (
+          {data.syncing && data.progress && data.progress.total > 0 && (
+            <Progress
+              className="h-1 w-full"
+              value={
+                ((data.progress.completed + data.progress.failed) /
+                  data.progress.total) *
+                100
+              }
+            />
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {data.retry && (
+              <Button
+                variant="outline"
+                size="sm"
+                title="Sync recipes"
+                aria-label="Sync recipes"
+                disabled={!online || data.syncing}
+                onClick={() => {
+                  void navigator.storage?.persist?.().catch(() => false);
+                  data.retry?.();
+                }}
+              >
+                <RefreshCw className={data.syncing ? "animate-spin" : ""} />
+                Sync recipes
+              </Button>
+            )}
+            {data.clear && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    title="Clear saved recipes"
+                    aria-label="Clear saved recipes"
+                    disabled={(data.syncing ?? false) || !data.savedAt}
+                  >
+                    <Trash2 />
+                    Clear saved recipes
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear saved recipes?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Remove offline recipes and photos from this device. Online
+                      recipes are not affected.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        void data
+                          .clear?.()
+                          .catch(() =>
+                            toast.error("Saved recipes could not be cleared."),
+                          )
+                      }
+                    >
+                      Clear
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </section>
+        {!standalone && (
+          <div className="border-border border-t pt-4">
             <Button
-              variant="ghost"
-              size="icon-sm"
+              variant="outline"
+              size="sm"
               title="Install app"
               aria-label="Install app"
               onClick={async () => {
@@ -146,56 +221,9 @@ export function PwaTools() {
               }}
             >
               <Download />
+              Install app
             </Button>
-          )}
-          {data.clear && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  title="Clear saved recipes"
-                  aria-label="Clear saved recipes"
-                  disabled={(data.syncing ?? false) || !data.savedAt}
-                >
-                  <Trash2 />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Clear saved recipes?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Remove offline recipes and photos from this device. Online
-                    recipes are not affected.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      void data
-                        .clear?.()
-                        .catch(() =>
-                          toast.error("Saved recipes could not be cleared."),
-                        )
-                    }
-                  >
-                    Clear
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
-        {data.syncing && data.progress && data.progress.total > 0 && (
-          <Progress
-            className="h-1 w-full"
-            value={
-              ((data.progress.completed + data.progress.failed) /
-                data.progress.total) *
-              100
-            }
-          />
+          </div>
         )}
         <Dialog open={guide} onOpenChange={setGuide}>
           <DialogContent>
@@ -209,7 +237,7 @@ export function PwaTools() {
             </DialogHeader>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -11,6 +11,14 @@ test("cold offline launch opens an unvisited recipe and excludes admin", async (
   await expect(
     page.getByText("No saved recipes", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Data on This Device" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Clear saved recipes" }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect
     .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
     .toBe(true);
@@ -146,8 +154,13 @@ test("cold offline launch opens an unvisited recipe and excludes admin", async (
   });
   expect(keys).not.toContain("/admin");
   expect(keys).not.toContain("/sign-in");
+  await coldPage.getByRole("button", { name: "Settings", exact: true }).click();
   await coldPage.getByRole("button", { name: "Clear saved recipes" }).click();
   await coldPage.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect(
+    coldPage.getByRole("button", { name: "Clear saved recipes" }),
+  ).toBeDisabled();
+  await coldPage.getByRole("button", { name: "Close", exact: true }).click();
   await expect(
     coldPage.getByText("No saved recipes", { exact: true }),
   ).toBeVisible();
@@ -193,11 +206,12 @@ test("photo quota exhaustion leaves recipe text usable and reports incomplete do
     route.fulfill({ contentType: "image/png", body: photo }),
   );
   await page.goto("/recipes");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(
     page.getByText("Recipes saved; photos incomplete", { exact: true }),
   ).toBeVisible({ timeout: 45000 });
   const href = await page
-    .locator('main a[href^="/recipes/"]')
+    .locator('main .group:has(img) a[href^="/recipes/"]')
     .first()
     .getAttribute("href");
   if (!href)
@@ -222,6 +236,11 @@ test("public synchronization saves public fields and downloads photos for offlin
     route.fulfill({ contentType: "image/png", body: photo }),
   );
   await page.goto("/recipes");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(
+    page.getByText("Available offline", { exact: true }),
+  ).not.toBeVisible();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(
     page.getByText("Available offline", { exact: true }),
   ).toBeVisible({ timeout: 45000 });
@@ -280,5 +299,24 @@ test("public synchronization saves public fields and downloads photos for offlin
       path: `test-results/offline-${width}.png`,
       fullPage: true,
     });
+    await offline
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
+    await expect(
+      offline.getByRole("heading", { name: "Data on This Device" }),
+    ).toBeVisible();
+    await expect(
+      offline.getByRole("button", { name: "Sync recipes" }),
+    ).toBeDisabled();
+    expect(
+      await offline.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await offline.screenshot({
+      path: `test-results/settings-${width}.png`,
+      fullPage: true,
+    });
+    await offline.getByRole("button", { name: "Close", exact: true }).click();
   }
 });

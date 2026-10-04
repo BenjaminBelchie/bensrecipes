@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "~/components/SiteHeader";
 import { OfflineApp } from "~/components/OfflineApp";
 
 export const dynamic = "force-static";
@@ -9,12 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function OfflinePage() {
-  return (
-    <>
-      <SiteHeader />
-      <main>
-        <OfflineApp />
-      </main>
-    </>
-  );
+  return <OfflineApp />;
 }

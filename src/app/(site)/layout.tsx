@@ -3,7 +3,6 @@ import { ConvexClientProvider } from "~/app/ConvexClientProvider";
 import { SiteHeader } from "~/components/SiteHeader";
 import { UserNav } from "~/components/UserNav";
 import { OnlineRecipeProvider } from "~/components/RecipeDataProvider";
-import { PwaTools } from "~/components/PwaTools";
 
 export default function SiteLayout({
   children,
@@ -17,7 +16,6 @@ export default function SiteLayout({
           <SiteHeader>
             <UserNav />
           </SiteHeader>
-          <PwaTools />
           <main>{children}</main>
         </OnlineRecipeProvider>
       </ConvexClientProvider>
