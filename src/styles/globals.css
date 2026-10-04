@@ -6,6 +6,16 @@ html {
   scroll-padding-top: 4rem;
 }
 
+.site-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Prevent iOS Safari auto-zoom on input focus (triggered when font-size < 16px) */
 @media (max-width: 767px) {
   input,

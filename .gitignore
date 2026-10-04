@@ -7,6 +7,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/public/sw.js
+/public/sw.js.map
 
 # database
 /prisma/db.sqlite

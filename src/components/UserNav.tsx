@@ -3,10 +3,13 @@
 import { UserButton, SignInButton, useAuth } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated } from "convex/react";
 import Link from "next/link";
+import { useOnline } from "~/hooks/use-online";
 
 export function UserNav() {
+  const online = useOnline();
   const { sessionClaims } = useAuth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
+  if (!online) return null;
 
   return (
     <div className="flex items-center gap-6 text-sm">

@@ -3,10 +3,11 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Loader2, X } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useOnlineMutation } from "~/hooks/use-online-mutation";
 import { type Id } from "~/convex/_generated/dataModel";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
+import { useOnline } from "~/hooks/use-online";
 
 interface ImageUploadProps {
   /** Current image URL to preview (from storage or external) */
@@ -16,7 +17,8 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
-  const generateUploadUrl = useMutation(api.recipes.generateUploadUrl);
+  const online = useOnline();
+  const generateUploadUrl = useOnlineMutation(api.recipes.generateUploadUrl);
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(
     currentImageUrl ?? null,
@@ -25,6 +27,10 @@ export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    if (!navigator.onLine) {
+      setError("Image uploads require a connection.");
+      return;
+    }
     if (!file.type.startsWith("image/")) {
       setError("Please select an image file.");
       return;
@@ -81,7 +87,7 @@ export function ImageUpload({ currentImageUrl, onUpload }: ImageUploadProps) {
           type="button"
           variant="outline"
           size="sm"
-          disabled={uploading}
+          disabled={uploading || !online}
           onClick={() => inputRef.current?.click()}
         >
           {uploading ? (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useOnlineMutation } from "~/hooks/use-online-mutation";
 import { toast } from "sonner";
 import { api } from "~/convex/_generated/api";
 import {
@@ -12,7 +12,7 @@ import {
 
 export default function NewRecipePage() {
   const router = useRouter();
-  const createRecipe = useMutation(api.recipes.create);
+  const createRecipe = useOnlineMutation(api.recipes.create);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave({

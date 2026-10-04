@@ -34,6 +34,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import { useOnline } from "~/hooks/use-online";
 
 export type RecipeDifficulty = "easy" | "medium" | "hard";
 
@@ -93,6 +94,7 @@ export function RecipeEditor({
   onSave,
   breadcrumbs,
 }: RecipeEditorProps) {
+  const online = useOnline();
   const {
     markdown: initialMarkdown = "",
     imageId: initialImageId = null,
@@ -112,6 +114,7 @@ export function RecipeEditor({
       cuisine: initialCuisine,
     },
     onSubmit: async ({ value }) => {
+      if (!navigator.onLine) return;
       await onSave({
         title: extractTitle(value.markdown),
         markdown: value.markdown,
@@ -188,7 +191,7 @@ export function RecipeEditor({
             {/* Mobile: icon-only save */}
             <Button
               onClick={() => void form.handleSubmit()}
-              disabled={form.state.isSubmitting || !markdown.trim()}
+              disabled={!online || form.state.isSubmitting || !markdown.trim()}
               size="sm"
               className="md:hidden"
               aria-label={saveLabel}
@@ -198,7 +201,7 @@ export function RecipeEditor({
             {/* Desktop: full save button */}
             <Button
               onClick={() => void form.handleSubmit()}
-              disabled={form.state.isSubmitting || !markdown.trim()}
+              disabled={!online || form.state.isSubmitting || !markdown.trim()}
               size="sm"
               className="hidden md:inline-flex"
             >

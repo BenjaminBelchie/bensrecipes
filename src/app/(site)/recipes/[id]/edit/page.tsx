@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
+import { useOnlineMutation } from "~/hooks/use-online-mutation";
 import { toast } from "sonner";
 import { api } from "~/convex/_generated/api";
 import { type Id } from "~/convex/_generated/dataModel";
@@ -15,7 +16,7 @@ export default function EditRecipePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const recipe = useQuery(api.recipes.getById, { id: id as Id<"recipes"> });
-  const updateRecipe = useMutation(api.recipes.update);
+  const updateRecipe = useOnlineMutation(api.recipes.update);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave({

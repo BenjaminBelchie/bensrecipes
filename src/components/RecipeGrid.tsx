@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "convex/react";
+import { useRecipes } from "~/components/RecipeDataProvider";
 import Link from "next/link";
-import Image from "next/image";
+import { RecipePhoto } from "~/components/RecipePhoto";
 import { AnimatePresence, motion } from "motion/react";
-import { api } from "~/convex/_generated/api";
+import { filterRecipes } from "~/lib/recipe-filters";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 
@@ -22,33 +22,17 @@ export default function RecipeGrid({
   cuisine?: string;
   searchQuery?: string;
 }) {
-  const allRecipes = useQuery(api.recipes.get);
+  const { snapshot, offline } = useRecipes();
+  const allRecipes = snapshot?.recipes;
 
   const recipes = useMemo(() => {
     if (!allRecipes) return allRecipes;
-    return allRecipes.filter((recipe) => {
-      if (
-        searchQuery.trim() &&
-        !recipe.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
-      )
-        return false;
-      if (
-        selectedTags.length > 0 &&
-        !selectedTags.every((t) => recipe.tags?.includes(t))
-      )
-        return false;
-      if (difficulty && recipe.difficulty !== difficulty) return false;
-      if (timeRange) {
-        const t = recipe.totalTime;
-        if (t === undefined || t === null) return false;
-        if (timeRange === "lt15" && t >= 15) return false;
-        if (timeRange === "15to30" && (t < 15 || t > 30)) return false;
-        if (timeRange === "30to60" && (t < 30 || t > 60)) return false;
-        if (timeRange === "gt60" && t <= 60) return false;
-      }
-      if (cuisine && recipe.cuisine?.toLowerCase() !== cuisine.toLowerCase())
-        return false;
-      return true;
+    return filterRecipes(allRecipes, {
+      searchQuery,
+      selectedTags,
+      difficulty,
+      timeRange,
+      cuisine,
     });
   }, [allRecipes, selectedTags, difficulty, timeRange, cuisine, searchQuery]);
 
@@ -101,6 +85,7 @@ export default function RecipeGrid({
           >
             <Link
               href={`/recipes/${recipe._id}`}
+              prefetch={!offline}
               className="group border-border bg-card hover:shadow-primary/10 relative block overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
             >
               {/* Image / placeholder */}
@@ -109,11 +94,11 @@ export default function RecipeGrid({
                   className="relative aspect-[4/3] overflow-hidden bg-black"
                   style={{ viewTransitionName: `recipe-image-${recipe._id}` }}
                 >
-                  <Image
+                  <RecipePhoto
                     src={recipe.imageUrl}
                     alt={recipe.title}
-                    fill
-                    className="object-cover"
+                    identity={recipe.imageId}
+                    offline={offline}
                   />
                 </div>
               ) : (

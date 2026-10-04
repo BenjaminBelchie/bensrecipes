@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
+import { useOnlineMutation } from "~/hooks/use-online-mutation";
+import { useOnline } from "~/hooks/use-online";
+import { toast } from "sonner";
 import { PlusIcon, X } from "lucide-react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
@@ -34,12 +37,13 @@ interface TagSelectProps {
 }
 
 export function TagSelect({ value, onChange }: TagSelectProps) {
+  const online = useOnline();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const tagAnchor = useComboboxAnchor();
   const tagAnchorMobile = useComboboxAnchor();
 
   const availableTags = useQuery(api.tags.list) ?? [];
-  const createTag = useMutation(api.tags.create);
+  const createTag = useOnlineMutation(api.tags.create);
 
   const createTagForm = useForm({
     defaultValues: { name: "" },
@@ -52,11 +56,16 @@ export function TagSelect({ value, onChange }: TagSelectProps) {
       },
     },
     onSubmit: async ({ value: formValue }) => {
+      if (!navigator.onLine) {
+        toast.error("Creating tags requires a connection.");
+        return;
+      }
       const trimmed = formValue.name.trim();
       try {
         await createTag({ name: trimmed });
       } catch {
-        // already exists — still select it
+        toast.error("Tag could not be created.");
+        return;
       }
       onChange(value.includes(trimmed) ? value : [...value, trimmed]);
       setCreateDialogOpen(false);
@@ -204,7 +213,9 @@ export function TagSelect({ value, onChange }: TagSelectProps) {
               }}
             </createTagForm.Field>
             <DialogFooter>
-              <Button type="submit">Create &amp; Select</Button>
+              <Button type="submit" disabled={!online}>
+                Create &amp; Select
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

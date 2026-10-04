@@ -27,3 +27,16 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## Progressive Web App
+
+Public recipes and optimized photos download automatically for offline reading. Wait for **Available offline** before disconnecting. Recipe management and sign-in remain online-only; admin writes are not queued.
+
+The service worker runs only in production. Test with `npm run build` followed by `npm run start` on localhost, or deploy over HTTPS for mobile installation. `npm run dev` intentionally does not register a worker.
+
+- `npm run assets:generate`: rebuild logos, icons, and Apple launch images from the root logo export.
+- `npm run test:unit`: local storage, filter, image-key, and route-policy tests.
+- `npx playwright install chromium`: install the browser needed for end-to-end checks.
+- `npm run test:pwa`: production browser tests; build first. The test runner starts a server on port 3110.
+
+See [the implementation plan and operating notes](docs/pwa-implementation-plan.md) for the architecture, platform limitations, recovery procedure, and remaining physical-device checks.

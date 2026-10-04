@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useRecipes } from "~/components/RecipeDataProvider";
 import { SlidersHorizontal, X, Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import RecipeGrid from "~/components/RecipeGrid";
-import { api } from "~/convex/_generated/api";
 import { cn } from "~/lib/utils";
 import { useIsMobile } from "~/hooks/use-mobile";
 import {
@@ -229,8 +228,15 @@ export default function RecipesPage() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
 
-  const availableTags = useQuery(api.tags.list) ?? [];
-  const availableCuisines = useQuery(api.recipes.listCuisines) ?? [];
+  const { snapshot } = useRecipes();
+  const availableTags = snapshot?.tags ?? [];
+  const availableCuisines = [
+    ...new Set(
+      snapshot?.recipes.flatMap((recipe) =>
+        recipe.cuisine ? [recipe.cuisine] : [],
+      ) ?? [],
+    ),
+  ].sort();
   const isMobile = useIsMobile();
 
   const activeFilters =

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useOnlineMutation } from "~/hooks/use-online-mutation";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { type Id } from "~/convex/_generated/dataModel";
 import { api } from "~/convex/_generated/api";
+import { useOnline } from "~/hooks/use-online";
 import { Button } from "~/components/ui/button";
 import {
   AlertDialog,
@@ -25,10 +26,15 @@ interface DeleteRecipeButtonProps {
 }
 
 export function DeleteRecipeButton({ id, title }: DeleteRecipeButtonProps) {
-  const removeRecipe = useMutation(api.recipes.remove);
+  const online = useOnline();
+  const removeRecipe = useOnlineMutation(api.recipes.remove);
   const [isPending, setIsPending] = useState(false);
 
   async function handleDelete() {
+    if (!navigator.onLine) {
+      toast.error("Deleting recipes requires a connection.");
+      return;
+    }
     setIsPending(true);
     try {
       await removeRecipe({ id });
@@ -46,7 +52,7 @@ export function DeleteRecipeButton({ id, title }: DeleteRecipeButtonProps) {
         <Button
           variant="destructive"
           size="xs"
-          disabled={isPending}
+          disabled={isPending || !online}
           aria-label="Delete"
         >
           <Trash2 />
